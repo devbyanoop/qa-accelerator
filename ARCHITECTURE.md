@@ -10,7 +10,7 @@ src/fixtures/          Dependency injection: wires page objects, API clients and
   |
   +-- src/pages/       Page objects (application-specific)
   +-- src/api/         API clients (base class is generic; domain clients are application-specific)
-  +-- src/data/        Typed test data and builders (application-specific)
+  +-- src/data/        Test data builders (added when a flow needs seeded data; today tests read from the API)
   |
 src/config/            Environment profiles and credential resolution (generic)
 src/utils/             Tags and shared helpers (generic)
@@ -27,6 +27,19 @@ src/utils/             Tags and shared helpers (generic)
 ## Application layer (replace per product)
 
 - Page objects, domain API clients, test data, and the specs themselves.
+
+## Design patterns used
+
+| Pattern                         | Where                                  | Why                                                                        |
+| ------------------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
+| Page Object Model               | `src/pages/`                           | Locators live in one class per page; tests call business actions.          |
+| Component Object                | `src/pages/components/header.ts`       | Shared UI (the header) is composed into pages, not copied.                 |
+| Fixture-based dependency inject | `src/fixtures/`                        | Tests request what they need; setup and cleanup are automatic.             |
+| Service Object (API client)     | `src/api/`                             | HTTP is wrapped in typed, business-level methods.                          |
+| Template Method                 | `BaseApiClient.send()`                 | Shared request, status check and error handling; subclasses add endpoints. |
+| Layered architecture            | tests, fixtures, pages and API, config | One-way dependencies make the application layer replaceable.               |
+| Environment-based configuration | `src/config/env.ts`                    | Profiles via `TEST_ENV`; nothing environment-specific in code.             |
+| Cross-cutting automatic fixture | `reportMetadata` in `base.fixture.ts`  | Report labels are applied to every test without touching specs.            |
 
 ## Principles
 
