@@ -43,6 +43,9 @@ if (process.argv.includes('--stop')) {
   await waitFor(`${apiUrl}/status`, 'API');
   console.log('seeding the database...');
   compose('exec', '-T', 'laravel-api', 'php', 'artisan', 'migrate:fresh', '--seed', '--force');
+  // The application caches search results and only clears them when data changes through the application, not
+  // when the database is reseeded, so on a reused stack it would keep answering with pre-reseed products.
+  compose('exec', '-T', 'laravel-api', 'php', 'artisan', 'cache:clear');
   await waitFor(`${apiUrl}/products`, 'API data');
   await waitFor(uiUrl, 'UI');
   console.log('\nThe application is ready.');

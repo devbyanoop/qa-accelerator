@@ -5,8 +5,7 @@ test.describe('Cart', () => {
   test(
     'adding a product updates the cart badge and total',
     { tag: [Tags.smoke, Tags.ui] },
-    async ({ productsApi, productPage, header, cartPage }) => {
-      const product = await productsApi.firstOrderable();
+    async ({ orderableProduct: product, productPage, header, cartPage }) => {
       const quantity = 2;
 
       await productPage.goto(product.id);

@@ -5,8 +5,13 @@ on:
     branches: [main]
   pull_request:
   schedule:
-    - cron: '0 2 * * *' # nightly, 02:00 UTC
+    - cron: '0 2 * * *' # nightly, 02:00 UTC, on all browsers
   workflow_dispatch:
+    inputs:
+      all_browsers:
+        description: Run on Chromium, Firefox and WebKit
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,13 +37,19 @@ jobs:
       - run: npm run format:check
 
   e2e:
-    name: E2E (chromium)
+    name: E2E (${{ matrix.browser }})
     needs: quality
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # Pushes and pull requests use Chromium only to stay fast; the nightly run and manual runs can use all three.
+        browser: ${{ fromJSON((github.event_name == 'schedule' || inputs.all_browsers) && '["chromium","firefox","webkit"]' || '["chromium"]') }}
     env:
       CI: 'true'
       TEST_ENV: ci
+      BROWSERS: ${{ matrix.browser }}
       UI_URL: http://localhost:4200
       API_URL: http://localhost:8091
       APP_NAME: Toolshop
@@ -54,7 +65,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
 
       # The application's web image is arm64-only; QEMU lets the x64 runner run it.
       - uses: docker/setup-qemu-action@v3
@@ -69,11 +80,19 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .allure
-          key: allure-history-${{ github.run_id }}
-          restore-keys: allure-history-
+          key: allure-history-${{ matrix.browser }}-${{ github.run_id }}
+          restore-keys: allure-history-${{ matrix.browser }}-
 
       - name: Run tests
         run: npx playwright test
+
+      # Advisory: screenshots can differ slightly between machines, so a mismatch is reported but never fails the build.
+      - name: Visual checks (advisory)
+        if: ${{ matrix.browser == 'chromium' && !cancelled() }}
+        continue-on-error: true
+        env:
+          VISUAL: 'true'
+        run: npx playwright test tests/ui/visual --output=test-results/visual
 
       - name: Build Allure report
         if: ${{ !cancelled() }}
@@ -84,7 +103,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: .allure
-          key: allure-history-${{ github.run_id }}
+          key: allure-history-${{ matrix.browser }}-${{ github.run_id }}
 
       - name: Application logs (on failure)
         if: failure()
@@ -94,7 +113,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.browser }}
           path: playwright-report
           retention-days: 14
 
@@ -102,7 +121,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report
+          name: allure-report-${{ matrix.browser }}
           path: allure-report
           retention-days: 14
 
@@ -110,7 +129,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ matrix.browser }}
           path: test-results
           retention-days: 14
 
@@ -129,7 +148,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: allure-report
+          name: allure-report-chromium
           path: allure-report
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

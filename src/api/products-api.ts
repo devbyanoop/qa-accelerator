@@ -1,5 +1,6 @@
 import type { APIRequestContext } from '@playwright/test';
 import type { ProductDraft } from '@data/builders';
+import { orderableProductDraft } from '@data/orderable-product';
 import { BaseApiClient } from './base-api-client';
 import { bearer } from './bearer';
 import type { ProductReferences } from './reference-api';
@@ -64,12 +65,24 @@ export class ProductsApi extends BaseApiClient {
     }
   }
 
-  /** First product that can be ordered (in stock, not a rental). */
-  async firstOrderable(): Promise<Product> {
-    const { data } = await this.list();
-    const product = data.find((p) => p.in_stock && !p.is_rental);
+  /** Finds the shared product that tests order from, or creates it. Run once per test run. */
+  async ensureOrderable(adminToken: string, references: ProductReferences): Promise<Product> {
+    const existing = await this.findByName(orderableProductDraft.name);
+    return existing ?? this.create(adminToken, orderableProductDraft, references);
+  }
+
+  /** The shared product that tests order from. */
+  async orderable(): Promise<Product> {
+    const product = await this.findByName(orderableProductDraft.name);
     if (!product) {
-      throw new Error('No in-stock, non-rental product found on the first page of the catalog.');
+      throw new Error(
+        `The shared product "${orderableProductDraft.name}" does not exist; the global setup creates it.`,
+      );
+    }
+    if (!product.in_stock) {
+      throw new Error(
+        `"${orderableProductDraft.name}" is out of stock. Reseed the application: npm run app:start.`,
+      );
     }
     return product;
   }

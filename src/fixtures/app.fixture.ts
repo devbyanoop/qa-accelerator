@@ -71,6 +71,8 @@ interface AppFixtures {
   seededCart: SeededCart;
   /** The checkout page at the billing-address step: signed-in customer with a seeded cart. */
   addressStep: CheckoutPage;
+  /** The shared, practically unlimited product that tests order from. */
+  orderableProduct: Product;
 
   // Admin session. Each of these pages is already signed in as the admin.
   /** Bearer token for the admin, created through the API. */
@@ -142,8 +144,9 @@ export const test = base.extend<AppFixtures>({
     await use(page);
   },
 
-  seededCart: async ({ context, cartsApi, productsApi }, use) => {
-    const product = await productsApi.firstOrderable();
+  orderableProduct: async ({ productsApi }, use) => use(await productsApi.orderable()),
+
+  seededCart: async ({ context, cartsApi, orderableProduct: product }, use) => {
     const quantity = 2;
     const cartId = await cartsApi.create();
     await cartsApi.addItem(cartId, product.id, quantity);

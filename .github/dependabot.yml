@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-tooling:
+        patterns: ['*']
+        update-types: [minor, patch]
+    ignore:
+      # Playwright is upgraded by hand together with the Dockerfile image tag and the visual baselines.
+      - dependency-name: '@playwright/test'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      # Must match the @playwright/test version; see above.
+      - dependency-name: mcr.microsoft.com/playwright

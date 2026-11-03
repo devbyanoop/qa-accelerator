@@ -32,6 +32,16 @@ export const env = {
   apiUrl: required('API_URL', 'http://localhost:8091'),
   /** Optional cap on parallel workers, e.g. for a slow or shared environment. */
   workers: process.env.WORKERS ? Number(process.env.WORKERS) : undefined,
+  /** Browsers to run, comma separated: chromium, firefox, webkit. Defaults to chromium only. */
+  browsers: (process.env.BROWSERS ?? 'chromium')
+    .split(',')
+    .map((browser) => browser.trim())
+    .filter(Boolean),
+  /**
+   * Visual-regression tests compare against screenshots made on Linux (see tests/ui/visual), so they run only
+   * when asked: VISUAL=true. Other operating systems render fonts differently and would never match.
+   */
+  visual: process.env.VISUAL === 'true',
 } as const;
 
 /** Credentials are resolved lazily so a run that never logs in does not need them. */

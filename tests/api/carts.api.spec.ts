@@ -5,8 +5,7 @@ test.describe('Carts API', () => {
   test(
     'an item added to a new cart can be read back',
     { tag: [Tags.smoke, Tags.api] },
-    async ({ cartsApi, productsApi }) => {
-      const product = await productsApi.firstOrderable();
+    async ({ cartsApi, orderableProduct: product }) => {
       const cartId = await cartsApi.create();
 
       await cartsApi.addItem(cartId, product.id, 2);

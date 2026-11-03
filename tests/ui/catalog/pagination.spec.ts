@@ -39,14 +39,16 @@ test.describe('Catalog pagination', () => {
     'the last page shows the remaining products',
     { tag: [Tags.regression, Tags.ui] },
     async ({ homePage }) => {
-      // The page applies its own filters, so take the paging numbers from the listing it actually loaded.
-      const { total, perPage, lastPage } = await homePage.gotoAndReadPaging();
-      const remaining = total - (lastPage - 1) * perPage;
+      // The page applies its own filters, so take the page count from the listing it actually loaded.
+      const { lastPage } = await homePage.gotoAndReadPaging();
 
-      await homePage.goToPage(lastPage);
+      // Other tests add and remove products while this one runs, so compare the cards with what the server
+      // returned for this very page instead of with a total read earlier.
+      const listing = await homePage.goToPageAndReadListing(lastPage);
 
-      await expect(homePage.activePage).toHaveText(String(lastPage));
-      await expect(homePage.productCards).toHaveCount(remaining);
+      expect(listing.productCount).toBeGreaterThan(0);
+      await expect(homePage.activePage).toHaveText(String(listing.currentPage));
+      await expect(homePage.productCards).toHaveCount(listing.productCount);
     },
   );
 });

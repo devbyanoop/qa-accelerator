@@ -18,12 +18,34 @@ const allureReporter: ReporterDescription = [
   },
 ];
 
+const browserDevices = {
+  chromium: devices['Desktop Chrome'],
+  firefox: devices['Desktop Firefox'],
+  webkit: devices['Desktop Safari'],
+};
+
+function projectFor(name: string): {
+  name: string;
+  use: (typeof browserDevices)[keyof typeof browserDevices];
+} {
+  const device = browserDevices[name as keyof typeof browserDevices];
+  if (!device) {
+    throw new Error(`Unknown browser "${name}" in BROWSERS. Use: ${Object.keys(browserDevices).join(', ')}.`);
+  }
+  return { name, use: { ...device } };
+}
+
 export default defineConfig({
   testDir: './tests',
+  globalSetup: './src/config/global-setup.ts',
   fullyParallel: true,
   forbidOnly: env.isCI,
   retries: env.isCI ? 2 : 0,
   workers: env.workers ?? (env.isCI ? 2 : undefined),
+  grepInvert: env.visual ? undefined : /@visual/,
+  // One set of baselines for all machines: they are produced in the Linux runner image, so no platform suffix.
+  snapshotPathTemplate: '{testDir}/{testFileDir}/__screenshots__/{arg}-{projectName}{ext}',
+  expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: 'disabled' } },
   reporter: [
     env.isCI ? ['github'] : ['list'],
     ['html', { open: 'never' }],
@@ -37,5 +59,5 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: env.browsers.map(projectFor),
 });

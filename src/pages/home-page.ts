@@ -12,7 +12,8 @@ export class HomePage {
 
   constructor(private readonly page: Page) {
     // Card ids are "product-<26 char id>"; this excludes "product-name" and "product-price".
-    this.productCards = page.getByTestId(/^product-[0-9A-Z]{26}$/);
+    // Seeded products have uppercase ids and products created at runtime have lowercase ones.
+    this.productCards = page.getByTestId(/^product-[0-9A-Za-z]{26}$/);
     this.searchInput = page.getByTestId('search-query');
     this.searchSubmit = page.getByTestId('search-submit');
     this.searchReset = page.getByTestId('search-reset');
@@ -36,6 +37,18 @@ export class HomePage {
     ]);
     const body = (await response.json()) as { total: number; per_page: number; last_page: number };
     return { total: body.total, perPage: body.per_page, lastPage: body.last_page };
+  }
+
+  /** Opens a page of the catalog and returns what the server sent for it. */
+  async goToPageAndReadListing(pageNumber: number): Promise<{ currentPage: number; productCount: number }> {
+    const [response] = await Promise.all([
+      this.page.waitForResponse(
+        (r) => new URL(r.url()).pathname === '/products' && r.request().method() === 'QUERY',
+      ),
+      this.goToPage(pageNumber),
+    ]);
+    const body = (await response.json()) as { current_page: number; data: unknown[] };
+    return { currentPage: body.current_page, productCount: body.data.length };
   }
 
   async search(term: string): Promise<void> {

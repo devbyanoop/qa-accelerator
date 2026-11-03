@@ -15,6 +15,9 @@ const knownViolations = {
 };
 
 test.describe('Accessibility (WCAG 2.1 A/AA)', () => {
+  // Analysing a whole page with axe is slow, especially in Firefox.
+  test.describe.configure({ timeout: 60_000 });
+
   test(
     'the catalog page has no new violations',
     { tag: [Tags.regression, Tags.ui, Tags.a11y] },
@@ -44,8 +47,7 @@ test.describe('Accessibility (WCAG 2.1 A/AA)', () => {
   test(
     'a product page has no new violations',
     { tag: [Tags.regression, Tags.ui, Tags.a11y] },
-    async ({ productPage, productsApi, page }, testInfo) => {
-      const product = await productsApi.firstOrderable();
+    async ({ productPage, orderableProduct: product, page }, testInfo) => {
       await productPage.goto(product.id);
       await expect(productPage.name).toHaveText(product.name);
 
