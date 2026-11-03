@@ -1,0 +1,30 @@
+﻿{
+  "name": "qa-accelerator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Enterprise-ready Playwright + TypeScript end-to-end test automation framework",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "report": "playwright show-report",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^20.14.0",
+    "dotenv": "^16.4.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-playwright": "^2.12.2",
+    "prettier": "^3.9.10",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.72.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
