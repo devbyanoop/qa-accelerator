@@ -1,0 +1,46 @@
+# The reference application under test (Toolshop), as published Docker images.
+# Used by `npm run app:start`, the GitHub Actions workflow, and the Jenkins and Azure DevOps pipelines,
+# so every environment runs the same thing. No application source is needed.
+#
+# Ports: UI http://localhost:4200, API http://localhost:8091. The UI calls the API at localhost:8091,
+# so both must be reachable on localhost from the browser that runs the tests.
+#
+# Platforms are explicit because the images are single-architecture: api and ui are amd64, web is arm64.
+# Docker Desktop emulates whichever one your CPU lacks. On a plain Linux host, enable arm64 emulation once:
+#   docker run --privileged --rm tonistiigi/binfmt --install arm64
+name: toolshop
+
+services:
+  mariadb:
+    image: yobasystems/alpine-mariadb:10.6.11
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: toolshop
+
+  laravel-api:
+    image: testsmith/practice-software-testing-sprint5-api
+    platform: linux/amd64
+    environment:
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: '1'
+      DB_PORT: '3306'
+      DB_HOST: mariadb
+      host: localhost
+    depends_on:
+      - mariadb
+
+  web:
+    image: testsmith/practice-software-testing-web
+    platform: linux/arm64
+    ports:
+      - '8091:80'
+    depends_on:
+      - laravel-api
+
+  angular-ui:
+    image: testsmith/practice-software-testing-sprint5-ui
+    platform: linux/amd64
+    ports:
+      - '4200:4200'
+    command: bash -c "ng serve --host 0.0.0.0 --port 4200"

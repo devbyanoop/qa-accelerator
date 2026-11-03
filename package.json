@@ -7,6 +7,8 @@
     "test": "playwright test",
     "test:smoke": "playwright test --grep @smoke",
     "test:regression": "playwright test --grep @regression",
+    "app:start": "node scripts/start-app.mjs",
+    "app:stop": "node scripts/start-app.mjs --stop",
     "report": "playwright show-report",
     "report:allure:generate": "allure generate allure-results --clean",
     "report:allure:open": "allure open",

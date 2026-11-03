@@ -18,4 +18,11 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   { files: ['tests/**/*.ts'], ...playwright.configs['flat/recommended'] },
+  {
+    // Plain Node scripts: declare the Node globals they use.
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: { process: 'readonly', console: 'readonly', fetch: 'readonly', AbortSignal: 'readonly' },
+    },
+  },
 );

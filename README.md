@@ -8,14 +8,45 @@ open-source **Toolshop** reference application.
 > access control, and admin brand/user/order management. CI workflow included; container and pipeline
 > examples for other CI systems are being added.
 
-## Quick start
+## Run it locally
+
+**You need:** Node.js 20+ and Docker (Docker Desktop on Windows/macOS, Docker Engine on Linux). Ports `4200`
+and `8091` must be free.
 
 ```
+git clone <this repository> && cd qa-accelerator
 npm ci
-npx playwright install chromium
-cp .env.example .env.local     # set UI_URL, API_URL and credentials
-npm run test:smoke
+npx playwright install chromium        # on Linux use: npx playwright install --with-deps chromium
+cp .env.example .env.local             # then fill in the four credentials (see below)
+npm run app:start                      # starts and seeds the Toolshop app in Docker (first run downloads images)
+npm test
+npm run app:stop                       # removes the app containers and data when you are finished
 ```
+
+- **Credentials:** the reference application publishes demo accounts (one customer, one admin) in its
+  [README](https://github.com/testsmith-io/practice-software-testing#readme). Put them in `.env.local` as
+  `CUSTOMER_EMAIL`, `CUSTOMER_PASSWORD`, `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
+- **Same machine:** the application's UI calls its API at `localhost:8091`, so run the tests on the machine
+  that runs Docker (or forward both ports to your machine).
+- **Linux:** one image of the application is arm64-only. Enable emulation once with
+  `docker run --privileged --rm tonistiigi/binfmt --install arm64`. Docker Desktop already includes it.
+- **Nothing else is required:** the application runs from published images defined in
+  `infra/toolshop/docker-compose.yml`, so you do not need its source code.
+
+## Run in a container
+
+The `Dockerfile` builds a runner image with the dependencies and matching Playwright browsers, so no Node or
+browser install is needed on the machine that runs the tests (Linux host shown; the application must already
+be running):
+
+```
+docker build -t qa-accelerator-runner .
+docker run --rm --init --ipc=host --network host \
+  -e CUSTOMER_EMAIL -e CUSTOMER_PASSWORD -e ADMIN_EMAIL -e ADMIN_PASSWORD \
+  qa-accelerator-runner --grep @smoke
+```
+
+`--network host` lets the browser in the container reach the application on the host's `localhost`.
 
 ## Select an environment
 
@@ -50,10 +81,12 @@ environment details (application, environment, URLs, Node, OS).
 `.github/workflows/playwright.yml` runs on every push to `main`, every pull request, nightly, and on demand.
 
 1. **quality** job: lint, typecheck and format check.
-2. **e2e** job: checks out the reference application at a pinned commit, starts it with Docker Compose, seeds
-   its database, waits until it is healthy, runs the suite on Chromium, then uploads the Playwright report,
-   the Allure report and traces/videos/JUnit as artifacts (kept 14 days).
+2. **e2e** job: starts its own copy of the reference application with `npm run app:start` (Docker Compose on
+   the runner), seeds its database, waits until it is healthy, runs the suite on Chromium, then uploads the
+   Playwright report, the Allure report and traces/videos/JUnit as artifacts (kept 14 days).
 3. **publish-report** job (optional): publishes the Allure report to GitHub Pages.
+
+Each run brings up its own application, so CI never depends on any developer's machine or Docker host.
 
 Repository setup:
 
@@ -61,6 +94,18 @@ Repository setup:
   `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
 - **Optional report site:** enable Pages with source "GitHub Actions" and set the repository variable
   `PUBLISH_REPORT=true`. Allure trend history is kept between runs with the Actions cache.
+
+### Other CI systems
+
+The same flow is provided for systems you may meet at a client:
+
+- **Jenkins:** `Jenkinsfile` (declarative). Needs a Linux agent with Docker, the NodeJS plugin tool `node-20`,
+  and four Secret-text credentials. Tests run inside the runner image from the `Dockerfile`.
+- **Azure DevOps:** `azure-pipelines.yml`. Needs a variable group `qa-accelerator-secrets` with the four
+  credentials as secret variables.
+
+Both start the application with `npm run app:start`, publish JUnit results, and keep the Playwright and Allure
+reports as build artifacts.
 
 ## Adapting to your application
 

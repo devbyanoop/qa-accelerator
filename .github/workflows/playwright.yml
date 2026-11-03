@@ -15,11 +15,6 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  # Reference application under test, pinned to a commit for reproducible runs.
-  SUT_REPO: testsmith-io/practice-software-testing
-  SUT_REF: ae7caecb811dd8952c09d997e69be7cb946ecd44
-
 jobs:
   quality:
     name: Lint, typecheck, format
@@ -54,49 +49,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check out the application under test
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.SUT_REPO }}
-          ref: ${{ env.SUT_REF }}
-          path: sut
-
-      # The reference app's web image is arm64-only; QEMU lets the x64 runner run it.
-      - uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
-      - name: Start the application
-        working-directory: sut
-        run: docker compose -f docker-compose.prod.yml up -d mariadb laravel-api web angular-ui
-
-      - name: Wait for the API
-        run: |
-          for i in $(seq 1 60); do
-            curl -fsS "$API_URL/status" >/dev/null 2>&1 && exit 0
-            sleep 3
-          done
-          echo "API did not become ready" && exit 1
-
-      - name: Seed the database
-        working-directory: sut
-        run: docker compose -f docker-compose.prod.yml exec -T laravel-api php artisan migrate:fresh --seed --force
-
-      - name: Wait for data and UI
-        run: |
-          for i in $(seq 1 60); do
-            curl -fsS "$API_URL/products" >/dev/null 2>&1 \
-              && curl -fsS "$UI_URL" >/dev/null 2>&1 && exit 0
-            sleep 3
-          done
-          echo "Application did not become ready" && exit 1
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+
+      # The application's web image is arm64-only; QEMU lets the x64 runner run it.
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      # Starts the Toolshop containers from infra/toolshop, seeds the database and waits until it is ready.
+      - name: Start the application under test
+        run: npm run app:start
 
       - name: Restore Allure history
         uses: actions/cache/restore@v4
@@ -121,8 +88,7 @@ jobs:
 
       - name: Application logs (on failure)
         if: failure()
-        working-directory: sut
-        run: docker compose -f docker-compose.prod.yml logs --no-color --tail=200
+        run: docker compose -f infra/toolshop/docker-compose.yml logs --no-color --tail=200
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
