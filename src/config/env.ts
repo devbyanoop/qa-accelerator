@@ -28,6 +28,8 @@ export const env = {
   isCI: Boolean(process.env.CI),
   uiUrl: required('UI_URL', 'http://localhost:4200'),
   apiUrl: required('API_URL', 'http://localhost:8091'),
+  /** Optional cap on parallel workers, e.g. for a slow or shared environment. */
+  workers: process.env.WORKERS ? Number(process.env.WORKERS) : undefined,
 } as const;
 
 /** Credentials are resolved lazily so a run that never logs in does not need them. */

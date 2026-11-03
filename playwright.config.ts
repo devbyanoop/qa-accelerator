@@ -6,12 +6,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: env.isCI,
   retries: env.isCI ? 2 : 0,
-  workers: env.isCI ? 2 : undefined,
+  workers: env.workers ?? (env.isCI ? 2 : undefined),
   reporter: env.isCI
     ? [['blob'], ['junit', { outputFile: 'test-results/junit.xml' }], ['github']]
     : [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: env.uiUrl,
+    testIdAttribute: 'data-test',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

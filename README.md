@@ -4,8 +4,8 @@ A layered Playwright + TypeScript end-to-end test automation framework: environm
 clients, dependency-injected fixtures, tagged suites and CI-ready reporting. It is demonstrated against the
 open-source **Toolshop** reference application.
 
-> **Status:** foundation layers in place (config, API base client, fixtures, lint/typecheck). Page objects,
-> test suites and CI pipelines are being added.
+> **Status:** foundation, page objects, typed API clients and a first suite (16 tests across API and UI) are in
+> place. Checkout and admin flows, and CI pipelines, are being added.
 
 ## Quick start
 
