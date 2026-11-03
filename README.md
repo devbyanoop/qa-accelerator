@@ -97,15 +97,9 @@ Repository setup:
 
 ### Other CI systems
 
-The same flow is provided for systems you may meet at a client:
-
-- **Jenkins:** `Jenkinsfile` (declarative). Needs a Linux agent with Docker, the NodeJS plugin tool `node-20`,
-  and four Secret-text credentials. Tests run inside the runner image from the `Dockerfile`.
-- **Azure DevOps:** `azure-pipelines.yml`. Needs a variable group `qa-accelerator-secrets` with the four
-  credentials as secret variables.
-
-Both start the application with `npm run app:start`, publish JUnit results, and keep the Playwright and Allure
-reports as build artifacts.
+Nothing in the suite is GitHub-specific. Any CI system with Docker can run it: start the application with
+`npm run app:start`, then run the tests with `npx playwright test`, or use the runner image built from the
+`Dockerfile`. JUnit results are written to `test-results/junit.xml`.
 
 ## Adapting to your application
 

@@ -1,6 +1,10 @@
 # The reference application under test (Toolshop), as published Docker images.
-# Used by `npm run app:start`, the GitHub Actions workflow, and the Jenkins and Azure DevOps pipelines,
-# so every environment runs the same thing. No application source is needed.
+# Used by `npm run app:start` and the GitHub Actions workflow, so every environment runs the same thing.
+# No application source is needed.
+#
+# Images are pinned by digest so a change upstream cannot break the suite unnoticed. To update a pin:
+#   docker pull <image>:latest && docker image inspect <image>:latest --format '{{index .RepoDigests 0}}'
+# then paste the digest here and run the suite.
 #
 # Ports: UI http://localhost:4200, API http://localhost:8091. The UI calls the API at localhost:8091,
 # so both must be reachable on localhost from the browser that runs the tests.
@@ -12,7 +16,7 @@ name: toolshop
 
 services:
   mariadb:
-    image: yobasystems/alpine-mariadb:10.6.11
+    image: yobasystems/alpine-mariadb:10.6.11@sha256:8bb25ca2d68c81118fcf745959560de2f316a178abf9decc8bb5b6f86c929084
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_USER: user
@@ -20,7 +24,8 @@ services:
       MYSQL_DATABASE: toolshop
 
   laravel-api:
-    image: testsmith/practice-software-testing-sprint5-api
+    # tag: latest
+    image: testsmith/practice-software-testing-sprint5-api@sha256:881cb7ecd76477994728648c0c16f6e9d2beed0f0217734843a32a7bb92553f0
     platform: linux/amd64
     environment:
       PHP_OPCACHE_VALIDATE_TIMESTAMPS: '1'
@@ -31,7 +36,8 @@ services:
       - mariadb
 
   web:
-    image: testsmith/practice-software-testing-web
+    # tag: latest
+    image: testsmith/practice-software-testing-web@sha256:950bafdc86501002c381e35d9b70e298fe211f4ab1fbfda334b67f03dffa048d
     platform: linux/arm64
     ports:
       - '8091:80'
@@ -39,7 +45,8 @@ services:
       - laravel-api
 
   angular-ui:
-    image: testsmith/practice-software-testing-sprint5-ui
+    # tag: latest
+    image: testsmith/practice-software-testing-sprint5-ui@sha256:f907d8daae32dc90ba900e964928d00bf0aabfab7067eaeeaa49f5a0f70c52e6
     platform: linux/amd64
     ports:
       - '4200:4200'
