@@ -24,9 +24,12 @@ export default defineConfig({
   forbidOnly: env.isCI,
   retries: env.isCI ? 2 : 0,
   workers: env.workers ?? (env.isCI ? 2 : undefined),
-  reporter: env.isCI
-    ? [['blob'], ['junit', { outputFile: 'test-results/junit.xml' }], ['github'], allureReporter]
-    : [['list'], ['html', { open: 'never' }], allureReporter],
+  reporter: [
+    env.isCI ? ['github'] : ['list'],
+    ['html', { open: 'never' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
+    allureReporter,
+  ],
   use: {
     baseURL: env.uiUrl,
     testIdAttribute: 'data-test',

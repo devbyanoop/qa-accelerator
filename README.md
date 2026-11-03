@@ -44,6 +44,22 @@ Each test is labelled automatically: epic (`APP_NAME`), layer (API or UI), featu
 severity (`@smoke` is critical). Page-object actions appear as named steps, and the report header carries the
 environment details (application, environment, URLs, Node, OS).
 
+## Continuous integration
+
+`.github/workflows/playwright.yml` runs on every push to `main`, every pull request, nightly, and on demand.
+
+1. **quality** job: lint, typecheck and format check.
+2. **e2e** job: checks out the reference application at a pinned commit, starts it with Docker Compose, seeds
+   its database, waits until it is healthy, runs the suite on Chromium, then uploads the Playwright report,
+   the Allure report and traces/videos/JUnit as artifacts (kept 14 days).
+3. **publish-report** job (optional): publishes the Allure report to GitHub Pages.
+
+Repository setup:
+
+- **Secrets** (Settings, Secrets and variables, Actions): `CUSTOMER_EMAIL` and `CUSTOMER_PASSWORD`.
+- **Optional report site:** enable Pages with source "GitHub Actions" and set the repository variable
+  `PUBLISH_REPORT=true`. Allure trend history is kept between runs with the Actions cache.
+
 ## Adapting to your application
 
 1. Add a `.env.<profile>` file for each of your environments.

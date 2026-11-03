@@ -1,0 +1,171 @@
+name: Playwright E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 2 * * *' # nightly, 02:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  # Reference application under test, pinned to a commit for reproducible runs.
+  SUT_REPO: testsmith-io/practice-software-testing
+  SUT_REF: ae7caecb811dd8952c09d997e69be7cb946ecd44
+
+jobs:
+  quality:
+    name: Lint, typecheck, format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+
+  e2e:
+    name: E2E (chromium)
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CI: 'true'
+      TEST_ENV: ci
+      UI_URL: http://localhost:4200
+      API_URL: http://localhost:8091
+      APP_NAME: Toolshop
+      CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
+      CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out the application under test
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SUT_REPO }}
+          ref: ${{ env.SUT_REF }}
+          path: sut
+
+      # The reference app's web image is arm64-only; QEMU lets the x64 runner run it.
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Start the application
+        working-directory: sut
+        run: docker compose -f docker-compose.prod.yml up -d mariadb laravel-api web angular-ui
+
+      - name: Wait for the API
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS "$API_URL/status" >/dev/null 2>&1 && exit 0
+            sleep 3
+          done
+          echo "API did not become ready" && exit 1
+
+      - name: Seed the database
+        working-directory: sut
+        run: docker compose -f docker-compose.prod.yml exec -T laravel-api php artisan migrate:fresh --seed --force
+
+      - name: Wait for data and UI
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS "$API_URL/products" >/dev/null 2>&1 \
+              && curl -fsS "$UI_URL" >/dev/null 2>&1 && exit 0
+            sleep 3
+          done
+          echo "Application did not become ready" && exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Restore Allure history
+        uses: actions/cache/restore@v4
+        with:
+          path: .allure
+          key: allure-history-${{ github.run_id }}
+          restore-keys: allure-history-
+
+      - name: Run tests
+        run: npx playwright test
+
+      - name: Build Allure report
+        if: ${{ !cancelled() }}
+        run: npx allure generate allure-results --clean
+
+      - name: Save Allure history
+        if: ${{ !cancelled() }}
+        uses: actions/cache/save@v4
+        with:
+          path: .allure
+          key: allure-history-${{ github.run_id }}
+
+      - name: Application logs (on failure)
+        if: failure()
+        working-directory: sut
+        run: docker compose -f docker-compose.prod.yml logs --no-color --tail=200
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 14
+
+      - name: Upload Allure report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          retention-days: 14
+
+      - name: Upload traces, videos and JUnit
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results
+          retention-days: 14
+
+  publish-report:
+    name: Publish report to GitHub Pages
+    needs: e2e
+    # Opt-in: set the repository variable PUBLISH_REPORT=true and enable Pages (Source: GitHub Actions).
+    if: ${{ !cancelled() && vars.PUBLISH_REPORT == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report
+      - id: deploy
+        uses: actions/deploy-pages@v4
