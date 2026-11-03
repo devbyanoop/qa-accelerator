@@ -4,8 +4,9 @@ A layered Playwright + TypeScript end-to-end test automation framework: environm
 clients, dependency-injected fixtures, tagged suites and CI-ready reporting. It is demonstrated against the
 open-source **Toolshop** reference application.
 
-> **Status:** foundation, page objects, typed API clients and a first suite (16 tests across API and UI) are in
-> place. Checkout and admin flows, and CI pipelines, are being added.
+> **Status:** 41 tests across API and UI: login, catalog, cart, checkout with every payment method, role-based
+> access control, and admin brand/user/order management. CI workflow included; container and pipeline
+> examples for other CI systems are being added.
 
 ## Quick start
 
@@ -56,7 +57,8 @@ environment details (application, environment, URLs, Node, OS).
 
 Repository setup:
 
-- **Secrets** (Settings, Secrets and variables, Actions): `CUSTOMER_EMAIL` and `CUSTOMER_PASSWORD`.
+- **Secrets** (Settings, Secrets and variables, Actions): `CUSTOMER_EMAIL`, `CUSTOMER_PASSWORD`,
+  `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
 - **Optional report site:** enable Pages with source "GitHub Actions" and set the repository variable
   `PUBLISH_REPORT=true`. Allure trend history is kept between runs with the Actions cache.
 

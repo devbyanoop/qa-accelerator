@@ -37,3 +37,17 @@ export interface Cart {
 }
 
 export type ProductSort = 'name,asc' | 'name,desc' | 'price,asc' | 'price,desc';
+
+export interface InvoiceLine {
+  quantity: number;
+}
+
+export interface Invoice {
+  id: string;
+  invoice_number: string;
+  status: string;
+  total: number;
+  billing_country: string;
+  billing_postal_code: string;
+  invoicelines: InvoiceLine[];
+}

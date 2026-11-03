@@ -49,6 +49,8 @@ jobs:
       APP_NAME: Toolshop
       CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
       CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
