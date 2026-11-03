@@ -39,12 +39,6 @@ export class AdminListPage {
   }
 }
 
-export class AdminUsersPage extends AdminListPage {
-  constructor(page: Page) {
-    super(page, '/admin/users', 'user');
-  }
-}
-
 export class AdminOrdersPage extends AdminListPage {
   constructor(page: Page) {
     super(page, '/admin/orders', 'order');

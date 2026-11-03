@@ -23,6 +23,21 @@ export class HomePage {
     await this.page.goto('/');
   }
 
+  /**
+   * Opens the catalog and returns the paging numbers of the listing the page itself requested. These can
+   * differ from the plain GET /products listing because the page applies its own filters.
+   */
+  async gotoAndReadPaging(): Promise<{ total: number; perPage: number; lastPage: number }> {
+    const [response] = await Promise.all([
+      this.page.waitForResponse(
+        (r) => new URL(r.url()).pathname === '/products' && r.request().method() === 'QUERY',
+      ),
+      this.page.goto('/'),
+    ]);
+    const body = (await response.json()) as { total: number; per_page: number; last_page: number };
+    return { total: body.total, perPage: body.per_page, lastPage: body.last_page };
+  }
+
   async search(term: string): Promise<void> {
     await test.step(`Search for "${term}"`, async () => {
       await this.searchInput.fill(term);
@@ -47,6 +62,29 @@ export class HomePage {
   async productPrices(): Promise<number[]> {
     const texts = await this.productCards.getByTestId('product-price').allTextContents();
     return texts.map((t) => Number(t.replace(/[^0-9.]/g, '')));
+  }
+
+  /** The highlighted page number in the pager, e.g. "2". */
+  get activePage(): Locator {
+    return this.page.locator('.pagination .page-item.active');
+  }
+
+  async goToPage(pageNumber: number): Promise<void> {
+    await test.step(`Go to page ${pageNumber}`, async () => {
+      await this.page.getByRole('button', { name: `Page-${pageNumber}`, exact: true }).click();
+    });
+  }
+
+  async nextPage(): Promise<void> {
+    await test.step('Go to the next page', async () => {
+      await this.page.getByTestId('pagination-next').click();
+    });
+  }
+
+  async previousPage(): Promise<void> {
+    await test.step('Go to the previous page', async () => {
+      await this.page.getByTestId('pagination-prev').click();
+    });
   }
 
   async openProduct(name: string): Promise<void> {

@@ -34,7 +34,8 @@ test.describe('Admin brands', () => {
     async ({ adminBrandsPage, seededBrand }) => {
       test.fail(
         true,
-        'Known application issue: GET /brands drops a deleted brand, but /brands/search, which the admin list uses, still returns it.',
+        'Known application issue: brand search results are cached for an hour and the cache is not cleared when ' +
+          'a brand is deleted, so the admin list keeps showing it.',
       );
 
       await adminBrandsPage.goto();

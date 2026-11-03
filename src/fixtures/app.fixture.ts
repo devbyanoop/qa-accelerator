@@ -7,13 +7,22 @@ import { BrandsApi } from '@api/brands-api';
 import type { Brand } from '@api/brands-api';
 import { CartsApi } from '@api/carts-api';
 import { InvoicesApi } from '@api/invoices-api';
+import { PaymentApi } from '@api/payment-api';
 import { PostcodeApi } from '@api/postcode-api';
 import { ProductsApi } from '@api/products-api';
+import { ReferenceDataApi } from '@api/reference-api';
+import type { ProductReferences } from '@api/reference-api';
 import type { Product } from '@api/types';
+import { UsersApi } from '@api/users-api';
+import type { UserRecord } from '@api/users-api';
+import { buildBrand, buildProduct, buildUser } from '@data/builders';
+import type { BrandDraft, ProductDraft, UserDraft } from '@data/builders';
 import { AccountPage } from '@pages/account-page';
 import { AdminBrandsPage, BrandFormPage } from '@pages/admin/admin-brands-page';
 import { AdminDashboardPage } from '@pages/admin/admin-dashboard-page';
-import { AdminOrdersPage, AdminUsersPage } from '@pages/admin/admin-list-page';
+import { AdminOrdersPage } from '@pages/admin/admin-list-page';
+import { AdminProductsPage, ProductFormPage } from '@pages/admin/admin-products-page';
+import { AdminUsersPage, UserFormPage } from '@pages/admin/admin-users-page';
 import { CartPage } from '@pages/cart-page';
 import { CheckoutPage } from '@pages/checkout-page';
 import { Header } from '@pages/components/header';
@@ -28,12 +37,6 @@ export interface SeededCart {
   quantity: number;
 }
 
-/** A unique brand definition for a test; the brand is removed afterwards if it was created. */
-export interface BrandDraft {
-  name: string;
-  slug: string;
-}
-
 interface AppFixtures {
   // API clients
   authApi: AuthApi;
@@ -41,6 +44,9 @@ interface AppFixtures {
   cartsApi: CartsApi;
   invoicesApi: InvoicesApi;
   brandsApi: BrandsApi;
+  usersApi: UsersApi;
+  referenceApi: ReferenceDataApi;
+  paymentApi: PaymentApi;
   accessApi: AccessApi;
   postcodeApi: PostcodeApi;
 
@@ -53,6 +59,8 @@ interface AppFixtures {
   checkoutPage: CheckoutPage;
   accountPage: AccountPage;
   brandForm: BrandFormPage;
+  productForm: ProductFormPage;
+  userForm: UserFormPage;
 
   // Customer session
   /** Bearer token for the customer, created through the API. */
@@ -69,14 +77,20 @@ interface AppFixtures {
   adminToken: string;
   adminDashboardPage: AdminDashboardPage;
   adminBrandsPage: AdminBrandsPage;
+  adminProductsPage: AdminProductsPage;
   adminUsersPage: AdminUsersPage;
   adminOrdersPage: AdminOrdersPage;
 
-  // Brand data
-  /** A unique brand name and slug that does not exist yet; any brand created with it is removed afterwards. */
+  // Test data. "new*" is a unique draft that does not exist yet and is removed afterwards if a test creates it.
+  // "seeded*" is created through the API first, and removed afterwards unless the test deleted it.
   newBrand: BrandDraft;
-  /** A brand created through the API; removed afterwards if the test has not already deleted it. */
   seededBrand: Brand;
+  /** The brand, category and image a new product points at. */
+  productReferences: ProductReferences;
+  newProduct: ProductDraft;
+  seededProduct: Product;
+  newUser: UserDraft;
+  seededUser: UserDraft & UserRecord;
 }
 
 /** Key under which the application stores its bearer token in localStorage. */
@@ -99,6 +113,9 @@ export const test = base.extend<AppFixtures>({
   cartsApi: async ({ api }, use) => use(new CartsApi(api)),
   invoicesApi: async ({ api }, use) => use(new InvoicesApi(api)),
   brandsApi: async ({ api }, use) => use(new BrandsApi(api)),
+  usersApi: async ({ api }, use) => use(new UsersApi(api)),
+  referenceApi: async ({ api }, use) => use(new ReferenceDataApi(api)),
+  paymentApi: async ({ api }, use) => use(new PaymentApi(api)),
   accessApi: async ({ api }, use) => use(new AccessApi(api)),
   postcodeApi: async ({ api }, use) => use(new PostcodeApi(api)),
 
@@ -110,6 +127,8 @@ export const test = base.extend<AppFixtures>({
   checkoutPage: async ({ page }, use) => use(new CheckoutPage(page)),
   accountPage: async ({ page }, use) => use(new AccountPage(page)),
   brandForm: async ({ page }, use) => use(new BrandFormPage(page)),
+  productForm: async ({ page }, use) => use(new ProductFormPage(page)),
+  userForm: async ({ page }, use) => use(new UserFormPage(page)),
 
   // Tokens are short-lived, so each test signs in through the API instead of sharing a saved session.
   customerToken: async ({ authApi }, use) => {
@@ -157,6 +176,10 @@ export const test = base.extend<AppFixtures>({
     await signIn(page, adminToken);
     await use(new AdminBrandsPage(page));
   },
+  adminProductsPage: async ({ page, adminToken }, use) => {
+    await signIn(page, adminToken);
+    await use(new AdminProductsPage(page));
+  },
   adminUsersPage: async ({ page, adminToken }, use) => {
     await signIn(page, adminToken);
     await use(new AdminUsersPage(page));
@@ -166,17 +189,40 @@ export const test = base.extend<AppFixtures>({
     await use(new AdminOrdersPage(page));
   },
 
+  // Brands are cleaned up by slug, which survives a rename.
   newBrand: async ({ brandsApi, adminToken }, use) => {
-    const unique = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-    const draft: BrandDraft = { name: `QA Brand ${unique}`, slug: `qa-brand-${unique}` };
+    const draft = buildBrand();
     await use(draft);
     await brandsApi.deleteBySlug(adminToken, draft.slug);
   },
 
   seededBrand: async ({ brandsApi, adminToken, newBrand }, use) => {
-    const brand = await brandsApi.create(adminToken, newBrand.name, newBrand.slug);
-    await use(brand);
-    // newBrand's teardown removes it by name; nothing more to do here.
+    await use(await brandsApi.create(adminToken, newBrand.name, newBrand.slug));
+  },
+
+  productReferences: async ({ referenceApi }, use) => use(await referenceApi.productReferences()),
+
+  // Products are cleaned up by name, so a test must not rename the product it creates.
+  newProduct: async ({ productsApi, adminToken }, use) => {
+    const draft = buildProduct();
+    await use(draft);
+    await productsApi.deleteByName(adminToken, draft.name);
+  },
+
+  seededProduct: async ({ productsApi, adminToken, newProduct, productReferences }, use) => {
+    await use(await productsApi.create(adminToken, newProduct, productReferences));
+  },
+
+  // Users are cleaned up by email, so a test must not change the email of the user it creates.
+  newUser: async ({ usersApi, adminToken }, use) => {
+    const draft = buildUser();
+    await use(draft);
+    await usersApi.deleteByEmail(adminToken, draft.email);
+  },
+
+  seededUser: async ({ usersApi, newUser }, use) => {
+    const record = await usersApi.create(newUser);
+    await use({ ...newUser, ...record });
   },
 });
 

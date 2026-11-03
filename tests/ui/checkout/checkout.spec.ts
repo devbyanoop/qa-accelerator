@@ -1,5 +1,5 @@
 import { credentialsFor } from '@config/env';
-import { futureExpiry, paymentSamples, sampleAddress } from '@data/checkout-data';
+import { invalidPaymentSamples, paymentSamples, sampleAddress } from '@data/checkout-data';
 import { expect, test } from '@fixtures/app.fixture';
 import { Tags } from '@utils/tags';
 
@@ -49,24 +49,20 @@ test.describe('Checkout', () => {
     },
   );
 
-  test(
-    'an invalid card number blocks the order',
-    { tag: [Tags.regression, Tags.ui] },
-    async ({ addressStep: checkout }) => {
-      await checkout.enterAddress(sampleAddress);
-      await checkout.continueToPayment();
+  for (const { reason, details } of invalidPaymentSamples()) {
+    test(
+      `the order is blocked with ${reason}`,
+      { tag: [Tags.regression, Tags.ui] },
+      async ({ addressStep: checkout }) => {
+        await checkout.enterAddress(sampleAddress);
+        await checkout.continueToPayment();
 
-      await checkout.fillPaymentDetails({
-        method: 'credit-card',
-        number: '1234',
-        expiry: futureExpiry(),
-        cvv: '123',
-        holder: 'Jane Doe',
-      });
+        await checkout.fillPaymentDetails(details);
 
-      await expect(checkout.finishButton).toBeDisabled();
-    },
-  );
+        await expect(checkout.finishButton).toBeDisabled();
+      },
+    );
+  }
 
   test(
     'an anonymous shopper can sign in during checkout and continue',
