@@ -1,3 +1,4 @@
+import { test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 /** Site header shared by every page. */
@@ -15,6 +16,8 @@ export class Header {
   }
 
   async openCart(): Promise<void> {
-    await this.cartLink.click();
+    await test.step('Open the cart', async () => {
+      await this.cartLink.click();
+    });
   }
 }

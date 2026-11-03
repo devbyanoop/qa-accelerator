@@ -5,3 +5,7 @@ blob-report/
 .auth/
 .env.local
 *.tsbuildinfo
+
+allure-results/
+allure-report/
+.allure/

@@ -29,6 +29,21 @@ npm run test:smoke
 npm run test:regression
 ```
 
+## Reporting
+
+Every run writes an [Allure 3](https://allurereport.org) results folder (Node only, no Java needed) alongside
+Playwright's built-in HTML report.
+
+```
+npm test                      # run the suite; writes allure-results/ and playwright-report/
+npm run report:allure         # build and open the Allure report
+npm run report                # open Playwright's HTML report (traces, video, screenshots)
+```
+
+Each test is labelled automatically: epic (`APP_NAME`), layer (API or UI), feature (the `describe` title) and
+severity (`@smoke` is critical). Page-object actions appear as named steps, and the report header carries the
+environment details (application, environment, URLs, Node, OS).
+
 ## Adapting to your application
 
 1. Add a `.env.<profile>` file for each of your environments.

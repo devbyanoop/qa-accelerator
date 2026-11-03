@@ -1,3 +1,4 @@
+import { test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 export class LoginPage {
@@ -18,8 +19,10 @@ export class LoginPage {
   }
 
   async login(email: string, password: string): Promise<void> {
-    await this.email.fill(email);
-    await this.password.fill(password);
-    await this.submit.click();
+    await test.step(`Log in as ${email}`, async () => {
+      await this.email.fill(email);
+      await this.password.fill(password);
+      await this.submit.click();
+    });
   }
 }

@@ -26,6 +26,8 @@ export type Role = 'admin' | 'customer';
 export const env = {
   name: targetEnv,
   isCI: Boolean(process.env.CI),
+  /** Label used in reports; set APP_NAME per product. */
+  appName: process.env.APP_NAME || 'Application under test',
   uiUrl: required('UI_URL', 'http://localhost:4200'),
   apiUrl: required('API_URL', 'http://localhost:8091'),
   /** Optional cap on parallel workers, e.g. for a slow or shared environment. */

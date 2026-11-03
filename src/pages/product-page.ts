@@ -1,3 +1,4 @@
+import { test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 export class ProductPage {
@@ -18,11 +19,15 @@ export class ProductPage {
   }
 
   async setQuantity(quantity: number): Promise<void> {
-    await this.quantity.fill(String(quantity));
+    await test.step(`Set quantity to ${quantity}`, async () => {
+      await this.quantity.fill(String(quantity));
+    });
   }
 
   async addToCart(): Promise<void> {
-    await this.addToCartButton.click();
+    await test.step('Add product to cart', async () => {
+      await this.addToCartButton.click();
+    });
   }
 
   async price(): Promise<number> {

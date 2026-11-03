@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "qa-accelerator",
   "version": "0.1.0",
   "private": true,
@@ -8,6 +8,9 @@
     "test:smoke": "playwright test --grep @smoke",
     "test:regression": "playwright test --grep @regression",
     "report": "playwright show-report",
+    "report:allure:generate": "allure generate allure-results --clean",
+    "report:allure:open": "allure open",
+    "report:allure": "npm run report:allure:generate && npm run report:allure:open",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -17,6 +20,9 @@
     "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.49.0",
     "@types/node": "^20.14.0",
+    "allure": "^3.22.1",
+    "allure-js-commons": "^3.14.0",
+    "allure-playwright": "^3.14.0",
     "dotenv": "^16.4.5",
     "eslint": "^9.39.5",
     "eslint-plugin-playwright": "^2.12.2",

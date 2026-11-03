@@ -1,3 +1,4 @@
+import { test } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 import type { ProductSort } from '@api/types';
 
@@ -23,8 +24,10 @@ export class HomePage {
   }
 
   async search(term: string): Promise<void> {
-    await this.searchInput.fill(term);
-    await this.searchSubmit.click();
+    await test.step(`Search for "${term}"`, async () => {
+      await this.searchInput.fill(term);
+      await this.searchSubmit.click();
+    });
   }
 
   async resetSearch(): Promise<void> {
@@ -32,7 +35,9 @@ export class HomePage {
   }
 
   async sortBy(sort: ProductSort): Promise<void> {
-    await this.sortSelect.selectOption(sort);
+    await test.step(`Sort products by ${sort}`, async () => {
+      await this.sortSelect.selectOption(sort);
+    });
   }
 
   async productNames(): Promise<string[]> {
