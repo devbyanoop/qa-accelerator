@@ -17,11 +17,13 @@ test.describe('Mobile viewport', () => {
   test(
     'search works on a phone',
     { tag: [Tags.regression, Tags.ui, Tags.mobile] },
-    async ({ homePage, productsApi }) => {
+    async ({ page, homePage, productsApi }) => {
       const [first] = (await productsApi.list()).data;
       const term = first!.name.split(' ')[0]!.toLowerCase();
 
       await homePage.goto();
+      // On a phone the search box is inside a collapsed "Filters" panel.
+      await page.getByRole('button', { name: 'Filters' }).click();
       await homePage.search(term);
 
       await expect
