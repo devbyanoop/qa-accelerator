@@ -174,7 +174,7 @@ team needs proof of a run. Everything is under `reports/` (see [reports/README.m
 npm test                  # runs the suite; results go to reports/_raw/
 npm run report:allure     # builds and opens the Allure report (reports/standard/allure)
 npm run report            # opens Playwright's HTML report (reports/standard/playwright)
-npm run clean             # removes everything under reports/
+npm run clean             # removes the generated reports (sealed archives are kept)
 ```
 
 Tests are labelled automatically: the application name, whether it is an API or UI test, the feature (taken

@@ -34,11 +34,12 @@ records every test. The ways to switch recording on, and what "every step" means
 
 In regulated mode, `npm run regulated:run` seals each dry and formal run as a zip in `reports/archive/`, with a
 `.sha256` file and an audit log. Nothing in there is overwritten, and it is git-ignored like everything else under
-`reports/`: copy an approved archive into your records. `npm run clean` removes it too, so keep copies of what
-matters first.
+`reports/`: copy an approved archive, with its `.sha256` file, into your records. `npm run clean` leaves the archive
+alone because it holds audit records; remove it by hand, or with `node tools/clean-reports.mjs archive`, only on
+purpose.
 
 ## Starting clean
 
-`npm run clean` removes everything under `reports/`. `npm run test:capture` clears `_raw` for you before it runs,
+`npm run clean` removes the generated reports under `reports/` (not the sealed archives). `npm run test:capture` clears `_raw` for you before it runs,
 so a validation run never contains results from an earlier run. For a normal run, results from earlier runs can
 still be in `_raw`, so run `npm run clean` first if you plan to build the regulated pack from it.
