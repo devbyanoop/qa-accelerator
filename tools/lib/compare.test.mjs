@@ -8,7 +8,7 @@ import { compareRuns, loadPack, parseCsv } from './compare.mjs';
 const rules = {
   dryMustPass: true,
   requireSameBuild: true,
-  requireSameCommit: true,
+  requireSameScripts: true,
   requireSameTests: true,
   requireSameVerdicts: true,
 };
@@ -116,4 +116,14 @@ test('two packs of the wrong run types are refused', async () => {
     rules,
   );
   assert.equal(result.checks.find((c) => c.id === 'types').ok, false);
+});
+
+test('a different commit with identical scripts is only a warning', async () => {
+  const result = await compare({}, { commit: 'b'.repeat(40) });
+  assert.equal(result.checks.find((c) => c.id === 'code').ok, true);
+  const commit = result.checks.find((c) => c.id === 'commit');
+  assert.equal(commit.ok, false);
+  assert.equal(commit.severity, 'warn');
+  assert.match(commit.detail, /scripts are identical/);
+  assert.equal(result.ok, true);
 });

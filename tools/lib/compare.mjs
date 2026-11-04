@@ -99,21 +99,30 @@ export function compareRuns(dry, formal, rules) {
     );
   }
 
-  if (rules.requireSameCommit) {
+  if (rules.requireSameScripts) {
     const a = dry.manifest.changeRecord?.start?.fingerprint;
     const b = formal.manifest.changeRecord?.start?.fingerprint;
-    const sameCommit = dry.manifest.commit === formal.manifest.commit;
-    const sameCode = Boolean(a && b) && a.overall === b.overall;
+    const sameScripts = Boolean(a && b) && a.overall === b.overall;
     const areas = a && b ? Object.keys(b.areas).filter((k) => a.areas[k] !== b.areas[k]) : [];
     add(
       'code',
-      'Both ran the same scripts (same commit and same code fingerprint)',
-      sameCommit && sameCode,
+      'Both ran the same scripts (same code fingerprint)',
+      sameScripts,
       !a || !b
         ? 'a code fingerprint is missing from a pack'
-        : sameCommit && sameCode
-          ? `commit ${String(formal.manifest.commit).slice(0, 8)}`
-          : `commits ${String(dry.manifest.commit).slice(0, 8)} and ${String(formal.manifest.commit).slice(0, 8)}${areas.length ? `; changed: ${areas.join(', ')}` : ''}`,
+        : sameScripts
+          ? `fingerprint ${a.overall.slice(0, 12)}, ${b.fileCount} files`
+          : `the scripts changed between the runs${areas.length ? ` (${areas.join(', ')})` : ''}`,
+    );
+    const sameCommit = dry.manifest.commit === formal.manifest.commit;
+    add(
+      'commit',
+      'Both ran from the same commit',
+      sameCommit,
+      sameCommit
+        ? String(formal.manifest.commit).slice(0, 8)
+        : `commits ${String(dry.manifest.commit).slice(0, 8)} and ${String(formal.manifest.commit).slice(0, 8)}${sameScripts ? '; the scripts are identical, so only files outside the scripts changed' : ''}`,
+      'warn',
     );
   }
 

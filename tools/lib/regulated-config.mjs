@@ -20,7 +20,7 @@ export const defaults = {
   compare: {
     dryMustPass: true,
     requireSameBuild: true,
-    requireSameCommit: true,
+    requireSameScripts: true,
     requireSameTests: true,
     requireSameVerdicts: true,
   },

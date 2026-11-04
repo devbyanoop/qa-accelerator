@@ -166,7 +166,11 @@ if (comparisonFailed) {
 }
 
 console.log('\n----------------------------------------------------------------');
-console.log(`${label}: ${testsPassed ? 'all tests passed' : 'SOME TESTS FAILED'}`);
+console.log(
+  comparisonFailed
+    ? `${label}: NOT ACCEPTED (${testsPassed ? 'the tests passed, but' : 'tests failed and'} the run differs from the dry run)`
+    : `${label}: ${testsPassed ? 'all tests passed' : 'SOME TESTS FAILED'}`,
+);
 if (sealed) {
   console.log(`Sealed archive: ${sealed.zipPath}`);
   console.log(`SHA-256:        ${sealed.sha256}`);
