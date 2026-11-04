@@ -86,13 +86,20 @@ jobs:
       - name: Run tests
         run: npx playwright test
 
-      # Advisory: screenshots can differ slightly between machines, so a mismatch is reported but never fails the build.
+      # Advisory: a mismatch is reported but never fails the build. The baselines were rendered in the Playwright
+      # image, whose fonts differ from the plain runner's, so the comparison runs in that same image. Keep the tag
+      # in step with @playwright/test and the Dockerfile.
       - name: Visual checks (advisory)
         if: ${{ matrix.browser == 'chromium' && !cancelled() }}
         continue-on-error: true
-        env:
-          VISUAL: 'true'
-        run: npx playwright test tests/ui/visual --output=test-results/visual
+        run: >
+          docker run --rm --init --ipc=host --network host
+          -v "$PWD:/work" -w /work
+          -e CI=true -e TEST_ENV=ci -e VISUAL=true -e BROWSERS=chromium
+          -e UI_URL -e API_URL -e APP_NAME
+          -e CUSTOMER_EMAIL -e CUSTOMER_PASSWORD -e ADMIN_EMAIL -e ADMIN_PASSWORD
+          mcr.microsoft.com/playwright:v1.64.1-noble
+          npx playwright test tests/ui/visual --reporter=list --output=test-results/visual
 
       - name: Build Allure report
         if: ${{ !cancelled() }}
