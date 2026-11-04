@@ -223,7 +223,8 @@ The full, step-by-step version is in [docs/adapting-to-your-application.md](docs
 
 1. Add a `.env.<profile>` file for each of your environments.
 2. Replace the contents of `src/pages`, the domain clients in `src/api` and `src/data` with your own.
-3. Leave `src/config`, `src/fixtures/base.fixture.ts` and `src/utils` alone. They are application-agnostic.
+3. Keep `src/config` (apart from the role list and the global setup), `src/fixtures/base.fixture.ts` and
+   `src/utils`. They are application-agnostic.
 
 [ARCHITECTURE.md](ARCHITECTURE.md) explains how the pieces fit together and [CONTRIBUTING.md](CONTRIBUTING.md)
 covers conventions for new tests. For the story behind the project, see the [case study](docs/case-study.md).
