@@ -21,6 +21,7 @@ table { border-collapse:collapse; width:100%; margin:0 0 1em; font-size:.92em; d
 th,td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--code); }
 li > input[type=checkbox] { margin-right:.4em; } ul:has(input[type=checkbox]) { list-style:none; padding-left:.5em; }
 @media print { main { max-width:none; padding:0; } pre, table, h2, h3 { break-inside: avoid; } h2, h3 { break-after: avoid; } a { color:var(--link); text-decoration:none; } }
+@media print { pre, pre code { white-space: pre-wrap; word-break: break-word; overflow: visible; } table { display: table; } }
 </style>
 </head>
 <body><main>
@@ -325,18 +326,70 @@ red build.</li>
 <li><strong>Ask before hard-coding application values</strong> that a test could read from the application instead.</li>
 </ul>
 <h2>Quick map of the repository</h2>
-<pre><code>src/config      environment profiles, credentials, global setup   (keep; edit Role and global setup)
-src/api         API clients                                        (replace the domain clients)
-src/data        builders and sample values                         (replace)
-src/pages       page objects and components                        (replace)
-src/fixtures    base.fixture.ts (keep), app.fixture.ts (rewrite)
-src/utils       tags, accessibility helper, contract helper        (keep)
-src/db          read-only database queries                         (replace or remove)
-tests           your specs                                         (replace)
-scripts         start-app.mjs                                      (adapt)
-infra           docker-compose for the application                 (replace)
-.github         CI workflow, Dependabot, templates                 (adapt)
-</code></pre>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>What it holds</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>src/config</code></td>
+<td>environment profiles, credentials, global setup</td>
+<td>Keep. Edit the role list and global setup</td>
+</tr>
+<tr>
+<td><code>src/api</code></td>
+<td>API clients</td>
+<td>Replace the domain clients</td>
+</tr>
+<tr>
+<td><code>src/data</code></td>
+<td>builders and sample values</td>
+<td>Replace</td>
+</tr>
+<tr>
+<td><code>src/pages</code></td>
+<td>page objects and components</td>
+<td>Replace</td>
+</tr>
+<tr>
+<td><code>src/fixtures</code></td>
+<td><code>base.fixture.ts</code> (generic), <code>app.fixture.ts</code> (wiring)</td>
+<td>Keep the first, rewrite the second</td>
+</tr>
+<tr>
+<td><code>src/utils</code></td>
+<td>tags, accessibility helper, contract helper</td>
+<td>Keep</td>
+</tr>
+<tr>
+<td><code>src/db</code></td>
+<td>read-only database queries</td>
+<td>Replace or remove</td>
+</tr>
+<tr>
+<td><code>tests</code></td>
+<td>your specs</td>
+<td>Replace</td>
+</tr>
+<tr>
+<td><code>scripts</code></td>
+<td><code>start-app.mjs</code>, which starts and seeds the app</td>
+<td>Adapt</td>
+</tr>
+<tr>
+<td><code>infra</code></td>
+<td>Docker Compose file for the application</td>
+<td>Replace</td>
+</tr>
+<tr>
+<td><code>.github</code></td>
+<td>CI workflow, Dependabot, templates</td>
+<td>Adapt</td>
+</tr>
+</tbody></table>
 
 </main></body>
 </html>

@@ -331,16 +331,16 @@ These are the things that went wrong while building the Toolshop version.
 
 ## Quick map of the repository
 
-```
-src/config      environment profiles, credentials, global setup   (keep; edit Role and global setup)
-src/api         API clients                                        (replace the domain clients)
-src/data        builders and sample values                         (replace)
-src/pages       page objects and components                        (replace)
-src/fixtures    base.fixture.ts (keep), app.fixture.ts (rewrite)
-src/utils       tags, accessibility helper, contract helper        (keep)
-src/db          read-only database queries                         (replace or remove)
-tests           your specs                                         (replace)
-scripts         start-app.mjs                                      (adapt)
-infra           docker-compose for the application                 (replace)
-.github         CI workflow, Dependabot, templates                 (adapt)
-```
+| Path           | What it holds                                          | What to do                                |
+| -------------- | ------------------------------------------------------ | ----------------------------------------- |
+| `src/config`   | environment profiles, credentials, global setup        | Keep. Edit the role list and global setup |
+| `src/api`      | API clients                                            | Replace the domain clients                |
+| `src/data`     | builders and sample values                             | Replace                                   |
+| `src/pages`    | page objects and components                            | Replace                                   |
+| `src/fixtures` | `base.fixture.ts` (generic), `app.fixture.ts` (wiring) | Keep the first, rewrite the second        |
+| `src/utils`    | tags, accessibility helper, contract helper            | Keep                                      |
+| `src/db`       | read-only database queries                             | Replace or remove                         |
+| `tests`        | your specs                                             | Replace                                   |
+| `scripts`      | `start-app.mjs`, which starts and seeds the app        | Adapt                                     |
+| `infra`        | Docker Compose file for the application                | Replace                                   |
+| `.github`      | CI workflow, Dependabot, templates                     | Adapt                                     |
