@@ -68,7 +68,7 @@ jobs:
       - run: npx playwright install --with-deps ${{ matrix.browser }}
 
       # The application's web image is arm64-only; QEMU lets the x64 runner run it.
-      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-qemu-action@v4
         with:
           platforms: arm64
 
