@@ -148,12 +148,6 @@ const comparisonSection = (number) =>
     })
     .join('')}</tbody></table>`;
 
-let sectionNumber = 8;
-const changeHtml = changeRecord ? changeSection(sectionNumber++) : '';
-const comparisonHtml = comparison ? comparisonSection(sectionNumber++) : '';
-const integrityNumber = sectionNumber;
-const extraNav = `${changeRecord ? '<a href="#changes">Changes</a>' : ''}${comparison ? '<a href="#comparison">Dry run comparison</a>' : ''}`;
-
 const overall =
   failed > 0 || verdictCount('Failed') > 0
     ? ['bad', 'Failed']
@@ -225,6 +219,12 @@ const mediaLinks = (t) => {
 const resultRow = (t) =>
   `<tr><td>${esc(t.name)}</td><td>${esc(t.project)}</td><td class="${tone(t.status)}">${esc(t.status)}${t.knownIssue ? ' <span class="meta">(known defect)</span>' : ''}</td>` +
   `<td>${esc(t.startedAt.replace('T', ' ').replace('Z', ''))}</td><td>${seconds(t.durationMs)}</td><td>${esc(t.requirements.join(', '))}</td><td class="meta">${esc(t.tags.join(', '))}</td><td>${mediaLinks(t) || '<span class="meta">none</span>'}</td></tr>`;
+
+let sectionNumber = 8;
+const changeHtml = changeRecord ? changeSection(sectionNumber++) : '';
+const comparisonHtml = comparison ? comparisonSection(sectionNumber++) : '';
+const integrityNumber = sectionNumber;
+const extraNav = `${changeRecord ? '<a href="#changes">Changes</a>' : ''}${comparison ? '<a href="#comparison">Dry run comparison</a>' : ''}`;
 
 const html = `<!doctype html>
 <html lang="en">
