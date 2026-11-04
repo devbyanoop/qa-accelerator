@@ -8,9 +8,11 @@ reports/
   standard/      The everyday reports. This is what a normal run gives you.
     allure/        npm run report:allure          (builds and opens it)
     playwright/    npm run report                 (opens it)
-  regulated/     The validation evidence pack. Only exists when you ask for it.
+  regulated/     The validation evidence pack of the latest run. Only exists when you ask for it.
     validation-report.html   <- start here: one page with everything, double-click to open
     ...                      npm run report:validation builds it; READ-ME-FIRST.txt in it explains the rest
+  archive/       Sealed zips of dry and formal runs, with .sha256 files and the audit log. Regulated mode only.
+                 These are audit records: `npm run clean` leaves them alone.
 ```
 
 ## Which one do I want?
@@ -19,6 +21,7 @@ reports/
 | ----------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------- |
 | See how a normal run went, find why a test failed           | `standard/allure` or `standard/playwright` | `npm test`, `npm run report:allure`                      |
 | Hand evidence to a quality team, auditor or client reviewer | `regulated/validation-report.html`         | `npm run test:capture`, then `npm run report:validation` |
+| Keep and e-sign the evidence of a dry or formal run         | `archive/*.zip` and its `.sha256` file     | `npm run regulated:run -- --type dry\|formal --build X`  |
 
 The standard report is the default. The regulated pack is a complete, separate copy of one run: its own Allure
 report, the traceability matrix, every screenshot and video with a timestamp bar, a manifest and checksums. Nothing

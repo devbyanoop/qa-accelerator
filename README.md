@@ -323,7 +323,11 @@ npm run regulated:run -- --type formal --build 2.4.1 --against reports/archive/D
 - **In CI:** a manual workflow with a protected `formal-validation` environment, where formal runs start from a
   release tag only.
 
-Full guide: [docs/regulated/dry-run-and-formal-run.pdf](docs/regulated/dry-run-and-formal-run.pdf).
+To try it, switch it on for one run with `REGULATED_MODE=on` and use a few tests (`--grep ...`), the same ones in
+both runs. The sealed zips land in `reports/archive/` and the latest run is unzipped in `reports/regulated/`.
+
+Full guide, including how to try it, review a run and clean up:
+[docs/regulated/dry-run-and-formal-run.pdf](docs/regulated/dry-run-and-formal-run.pdf).
 
 ### What it does not do
 
