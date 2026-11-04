@@ -9,6 +9,9 @@ cp .env.example .env.local   # then fill in the credentials
 npm run app:start            # start and seed the application under test in Docker
 ```
 
+The first `npm ci` also installs a pre-commit hook. It runs ESLint and Prettier on the files you stage, so
+formatting problems are fixed before they reach the pull request.
+
 ## Conventions
 
 - **Commits:** conventional commits (`feat:`, `fix:`, `docs:`, `chore:`, `test:`, `ci:`).
@@ -36,12 +39,34 @@ npm run app:start            # start and seed the application under test in Dock
   large stock that `src/config/global-setup.ts` finds or creates once per run.
 - **Read values from the application where you can** instead of hard-coding catalog data.
 
+## Flaky tests
+
+A test that fails now and then is worse than a missing test, because people stop trusting a red build.
+
+- **Don't paper over it.** Don't add retries, longer sleeps or `waitForTimeout`. Find out what the test is
+  racing against: a value that other tests change, a page that is still loading, a cache.
+- **Wait on the real condition.** Use a web-first assertion, or `expect.poll` when the thing you wait for is an
+  API result.
+- **Look at the evidence first.** CI keeps a trace for any test that needed a retry. Open it before changing
+  the test.
+- **Tests that pass only on retry are failures.** CI retries twice so one slow run doesn't block a merge, but
+  a test that needs it should be fixed within the week. If it can't be, tag it `@known-issue` with a reason, or
+  remove it. Don't leave it quarantined without a note.
+
 ## Known application defects
 
 When a test finds a defect in the application under test, do not weaken the assertion and do not leave the
 build red. Write the correct expectation, add `Tags.knownIssue`, and call `test.fail(true, '<what is wrong>')`
 at the top of the test. It is then reported as passing while the defect exists, and fails when the application
 is fixed, which is the signal to remove the tag.
+
+## API contract and mobile checks
+
+- **Contract:** `tests/api/contract.api.spec.ts` checks the shape of the responses the front end and the other
+  tests rely on, using `shapeProblems` in `src/utils/contract.ts`. Add the fields you depend on when you add a
+  client method.
+- **Mobile:** specs in `tests/ui/mobile` run only in the `mobile-chrome` project (a phone-sized Chrome), with
+  `BROWSERS=mobile-chrome`. The other specs are written for a desktop layout and are not run there.
 
 ## Accessibility and visual checks
 

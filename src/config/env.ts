@@ -32,7 +32,7 @@ export const env = {
   apiUrl: required('API_URL', 'http://localhost:8091'),
   /** Optional cap on parallel workers, e.g. for a slow or shared environment. */
   workers: process.env.WORKERS ? Number(process.env.WORKERS) : undefined,
-  /** Browsers to run, comma separated: chromium, firefox, webkit. Defaults to chromium only. */
+  /** Browsers to run, comma separated: chromium, firefox, webkit, mobile-chrome. Defaults to chromium only. */
   browsers: (process.env.BROWSERS ?? 'chromium')
     .split(',')
     .map((browser) => browser.trim())

@@ -1,6 +1,6 @@
 import os from 'node:os';
 import { defineConfig, devices } from '@playwright/test';
-import type { ReporterDescription } from '@playwright/test';
+import type { Project, ReporterDescription } from '@playwright/test';
 import { env } from './src/config/env';
 
 const allureReporter: ReporterDescription = [
@@ -22,17 +22,24 @@ const browserDevices = {
   chromium: devices['Desktop Chrome'],
   firefox: devices['Desktop Firefox'],
   webkit: devices['Desktop Safari'],
+  'mobile-chrome': devices['Pixel 7'],
 };
 
-function projectFor(name: string): {
-  name: string;
-  use: (typeof browserDevices)[keyof typeof browserDevices];
-} {
+// Phone-sized specs live in tests/ui/mobile. Only the mobile project runs them, because the other specs are
+// written for a desktop layout.
+const mobileSpecs = /[\\/]ui[\\/]mobile[\\/].*\.spec\.ts$/;
+
+function projectFor(name: string): Project {
   const device = browserDevices[name as keyof typeof browserDevices];
   if (!device) {
     throw new Error(`Unknown browser "${name}" in BROWSERS. Use: ${Object.keys(browserDevices).join(', ')}.`);
   }
-  return { name, use: { ...device } };
+  const isMobile = name.startsWith('mobile-');
+  return {
+    name,
+    use: { ...device },
+    ...(isMobile ? { testMatch: mobileSpecs } : { testIgnore: mobileSpecs }),
+  };
 }
 
 export default defineConfig({

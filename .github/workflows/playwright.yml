@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       all_browsers:
-        description: Run on Chromium, Firefox and WebKit
+        description: Run on Chromium, Firefox, WebKit and a phone-sized Chrome
         type: boolean
         default: false
 
@@ -45,7 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         # Pushes and pull requests use Chromium only to stay fast; the nightly run and manual runs can use all three.
-        browser: ${{ fromJSON((github.event_name == 'schedule' || inputs.all_browsers) && '["chromium","firefox","webkit"]' || '["chromium"]') }}
+        browser: ${{ fromJSON((github.event_name == 'schedule' || inputs.all_browsers) && '["chromium","firefox","webkit","mobile-chrome"]' || '["chromium"]') }}
     env:
       CI: 'true'
       TEST_ENV: ci
@@ -65,7 +65,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npx playwright install --with-deps ${{ matrix.browser == 'mobile-chrome' && 'chromium' || matrix.browser }}
 
       # The application's web image is arm64-only; QEMU lets the x64 runner run it.
       - uses: docker/setup-qemu-action@v3

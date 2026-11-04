@@ -22,7 +22,8 @@ objects and API clients (see "Using it on your own application" below).
 You can browse the report from the latest run on `main` without installing anything:
 [devbyanoop.github.io/qa-accelerator](https://devbyanoop.github.io/qa-accelerator/).
 
-There are 80 tests by default and 83 if you switch on the visual checks. Each one is tagged, so you can run
+There are 83 tests by default and 86 if you switch on the visual checks, plus 3 phone-sized ones you can run
+separately. Each one is tagged, so you can run
 only the slice you care about.
 
 - **Authentication:** login, wrong password, and protected pages bouncing anonymous visitors.
@@ -30,6 +31,8 @@ only the slice you care about.
 - **Cart and checkout:** adding to the cart, all five payment methods, address and payment validation, and
   signing in halfway through checkout. Every order is confirmed through the invoices API, not just by what
   the page says.
+- **API contract:** the shape of the product, product list and login responses, so a renamed field or a
+  changed type is caught with a clear message.
 - **Access control:** admin-only endpoints must answer 401 to anonymous users, 403 to customers and 200 to
   admins.
 - **Payment rules:** each validation rule of the payment check, valid and invalid input.
@@ -38,6 +41,7 @@ only the slice you care about.
 - **Accessibility:** axe-core scans of the main pages against WCAG 2.1 A/AA. The full result is attached to
   the report.
 - **Visual:** screenshot comparison of a few static components (login form, registration form, navigation).
+- **Mobile:** the catalog, search and sign-in on a phone-sized screen (Pixel 7 profile).
 
 ## Running it locally
 
@@ -104,6 +108,9 @@ BROWSERS=chromium,firefox,webkit npm test
 On Windows PowerShell, set the variable first: `$env:BROWSERS='chromium,firefox,webkit'`. The nightly CI run
 does this for you.
 
+For the phone-sized checks use `BROWSERS=mobile-chrome npm test`. That project runs only the specs in
+`tests/ui/mobile`, since the rest of the suite is written for a desktop layout. The nightly run includes it.
+
 ## Visual checks
 
 Screenshot baselines depend on the operating system's fonts, so I generate them inside the Linux runner image
@@ -163,7 +170,7 @@ demand.
    then the visual checks as an advisory step (a mismatch is reported but doesn't fail the build). It uploads
    the Playwright report, the Allure report and the traces, videos and JUnit file as artifacts for 14 days.
    Pushes and pull requests use Chromium. The nightly run, or a manual run with "all browsers" ticked, adds
-   Firefox and WebKit.
+   Firefox, WebKit and the phone-sized Chrome.
 3. The optional **publish-report** job puts the Allure report on GitHub Pages.
 
 Because every run starts its own application, CI doesn't depend on anyone's laptop or Docker host.
@@ -208,7 +215,7 @@ images in `infra/toolshop/docker-compose.yml` are pinned by digest, and the file
 3. Leave `src/config`, `src/fixtures/base.fixture.ts` and `src/utils` alone. They are application-agnostic.
 
 [ARCHITECTURE.md](ARCHITECTURE.md) explains how the pieces fit together and [CONTRIBUTING.md](CONTRIBUTING.md)
-covers conventions for new tests.
+covers conventions for new tests. For the story behind the project, see the [case study](docs/case-study.md).
 
 ## About
 
