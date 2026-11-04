@@ -33,7 +33,8 @@ test.describe('Database integrity', () => {
       const invoice = await toolshopDb.invoiceByNumber(invoice_number);
       expect(invoice, 'the invoice row').toBeDefined();
       expect(invoice!.billing_country).toBe(address.country);
-      expect(invoice!.status).toBe('AWAITING_FULFILLMENT');
+      // The application completes an order at once for every payment method except bank transfer, which is held.
+      expect(invoice!.status).toBe('COMPLETED');
 
       const items = await toolshopDb.invoiceItems(invoice!.id);
       expect(items).toHaveLength(1);
