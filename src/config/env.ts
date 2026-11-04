@@ -44,6 +44,8 @@ export const env = {
   visual: process.env.VISUAL === 'true',
   /** Burn a live date-and-time bar into every page, so screenshots and videos show when they were taken. */
   stamp: process.env.EVIDENCE_STAMP === 'true',
+  /** Shown first on the timestamp bar, for example "FORMAL RUN | build 2.4.1". Set by `npm run regulated:run`. */
+  runLabel: process.env.EVIDENCE_RUN_LABEL ?? '',
   /**
    * Direct, read-only access to the application's database, for the checks in tests/db. Set DB_HOST (and the
    * other DB_ values) to enable them; without DB_HOST those tests are skipped.

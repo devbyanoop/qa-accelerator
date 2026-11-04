@@ -19,6 +19,12 @@
     "traceability": "node tools/traceability.mjs",
     "evidence": "node tools/evidence-bundle.mjs",
     "clean": "node tools/clean-reports.mjs",
+    "regulated:status": "node tools/regulated-config.mjs",
+    "regulated:run": "node tools/regulated-run.mjs",
+    "regulated:compare": "node tools/regulated-compare.mjs",
+    "regulated:verify": "node tools/regulated-verify.mjs",
+    "regulated:note": "node tools/regulated-note.mjs",
+    "test:tools": "node --test tools/",
     "docs:pdf": "node tools/docs-to-pdf.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -34,6 +40,7 @@
     "allure": "^3.22.1",
     "allure-js-commons": "^3.14.0",
     "allure-playwright": "^3.14.0",
+    "archiver": "^8.0.0",
     "dotenv": "^16.4.5",
     "eslint": "^9.39.5",
     "eslint-plugin-playwright": "^2.12.2",
@@ -43,7 +50,8 @@
     "prettier": "^3.9.10",
     "simple-git-hooks": "^2.14.0",
     "typescript": "^5.6.0",
-    "typescript-eslint": "^8.72.1"
+    "typescript-eslint": "^8.72.1",
+    "yauzl": "^3.4.0"
   },
   "engines": {
     "node": ">=20"

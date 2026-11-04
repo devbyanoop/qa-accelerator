@@ -27,7 +27,9 @@ export const test = base.extend<FrameworkFixtures>({
   // Only wraps the context, so API-only tests still never start a browser.
   context: async ({ context }, use, testInfo) => {
     if (env.stamp) {
-      const label = `${currentCommit()}  |  ${testInfo.project.name}  |  ${testInfo.title}`;
+      const label = [env.runLabel, currentCommit(), testInfo.project.name, testInfo.title]
+        .filter(Boolean)
+        .join('  |  ');
       await context.addInitScript(installTimestampOverlay, { label });
     }
     await use(context);

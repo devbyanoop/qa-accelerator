@@ -50,6 +50,110 @@ const knownDefects = rows.flatMap((r) =>
 const notTested = rows.filter((r) => r.verdict === 'Not tested');
 const failures = tests.filter((t) => t.status === 'failed' || t.status === 'broken');
 
+// Regulated run extras: a banner for the run type, the change record and the comparison with the dry run.
+const runInfo = manifest?.run ?? null;
+const changeRecord = manifest?.changeRecord ?? null;
+const comparisonFile = path.join(path.dirname(manifestFile), 'comparison', 'comparison.json');
+const comparison = existsSync(comparisonFile) ? JSON.parse(readFileSync(comparisonFile, 'utf8')) : null;
+const short = (hash) => (hash ? String(hash).slice(0, 16) : 'none');
+
+const runBanner = !runInfo
+  ? ''
+  : comparison && !comparison.ok
+    ? `<div class="banner bad">FORMAL RUN NOT ACCEPTED: it differs from the accepted dry run (see the comparison below). Build ${esc(runInfo.buildId)}.</div>`
+    : runInfo.type === 'dry'
+      ? `<div class="banner warn">DRY RUN: a rehearsal against build ${esc(runInfo.buildId)}. This is not audit evidence.</div>`
+      : `<div class="banner ok">FORMAL RUN: build ${esc(runInfo.buildId)}${runInfo.executionId ? `, execution ${esc(runInfo.executionId)}` : ''}.</div>`;
+
+const stateRows = (snapshot) =>
+  [
+    detail('Taken', esc(snapshot.takenAt)),
+    detail('Commit', `<code>${esc(snapshot.git.commit)}</code>`),
+    detail(
+      'Branch and tag',
+      `${esc(snapshot.git.branch)}${snapshot.git.tag ? `, tag ${esc(snapshot.git.tag)}` : ''}`,
+    ),
+    detail(
+      'Working tree',
+      snapshot.git.clean
+        ? 'clean'
+        : `<span class="warn">dirty</span>: ${snapshot.git.changedFiles.map((f) => `<code>${esc(f)}</code>`).join(', ')}`,
+    ),
+    detail(
+      'Compared with the remote',
+      snapshot.git.upstream
+        ? `${esc(snapshot.git.upstream)}: ${snapshot.git.aheadOfUpstream} ahead, ${snapshot.git.behindUpstream} behind`
+        : 'no remote branch to compare with',
+    ),
+    detail(
+      'Code fingerprint',
+      `<code>${short(snapshot.fingerprint.overall)}</code> (${snapshot.fingerprint.fileCount} files)`,
+    ),
+    detail(
+      'By area',
+      Object.entries(snapshot.fingerprint.areas)
+        .map(([area, hash]) => `${esc(area)} <code>${short(hash)}</code>`)
+        .join('<br>'),
+    ),
+    detail(
+      'Environment profile',
+      `${esc(snapshot.config.profile)}, file hash <code>${short(snapshot.config.envFileSha256)}</code>`,
+    ),
+    ...snapshot.probes.map((p) =>
+      detail(
+        `Probe: ${esc(p.name)}`,
+        p.error
+          ? `<span class="warn">${esc(p.error)}</span>`
+          : `status ${p.status}, answer hash <code>${short(p.bodySha256)}</code>`,
+      ),
+    ),
+  ].join('\n');
+
+const changeSection = (number) =>
+  `<h2 id="changes">${number}. Changes and notes outside the run</h2>
+<p>This records what the code, the configuration and the application looked like when the run started and when it
+ended, and the notes people wrote while it ran.</p>
+<h3>Changes detected during the run</h3>
+${
+  changeRecord.differences.length
+    ? `<ul>${changeRecord.differences.map((d) => `<li class="warn">${esc(d)}</li>`).join('')}</ul>`
+    : '<p>None detected between the start and the end of the run.</p>'
+}
+<h3>Notes written during the run</h3>
+${
+  changeRecord.notes.length
+    ? `<table><thead><tr><th>When (UTC)</th><th>Who</th><th>Note</th></tr></thead><tbody>${changeRecord.notes
+        .map(
+          (n) =>
+            `<tr><td>${esc(n.at.replace('T', ' ').replace('Z', ''))}</td><td>${esc(n.by)}</td><td>${esc(n.text)}</td></tr>`,
+        )
+        .join('')}</tbody></table>`
+    : '<p>No notes were recorded.</p>'
+}
+<h3>At the start of the run</h3>
+<table class="kv"><tbody>${stateRows(changeRecord.start)}</tbody></table>
+<h3>At the end of the run</h3>
+<table class="kv"><tbody>${stateRows(changeRecord.end)}</tbody></table>
+<p class="meta">What this cannot show: edits made to systems outside this repository, such as the database, unless an
+application probe or a note records them.</p>`;
+
+const comparisonSection = (number) =>
+  `<h2 id="comparison">${number}. Comparison with the dry run</h2>
+<p>Dry run used: <b>${esc(comparison.against)}</b>. Result: <b class="${comparison.ok ? 'ok' : 'bad'}">${comparison.ok ? 'the runs match' : 'the runs differ'}</b>.</p>
+<table><thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead><tbody>${comparison.checks
+    .map((c) => {
+      const tone = c.ok ? 'ok' : c.severity === 'warn' ? 'warn' : 'bad';
+      const word = c.ok ? 'matches' : c.severity === 'warn' ? 'differs (warning)' : 'DIFFERS';
+      return `<tr><td>${esc(c.label)}</td><td class="${tone}">${word}</td><td>${esc(c.detail)}</td></tr>`;
+    })
+    .join('')}</tbody></table>`;
+
+let sectionNumber = 8;
+const changeHtml = changeRecord ? changeSection(sectionNumber++) : '';
+const comparisonHtml = comparison ? comparisonSection(sectionNumber++) : '';
+const integrityNumber = sectionNumber;
+const extraNav = `${changeRecord ? '<a href="#changes">Changes</a>' : ''}${comparison ? '<a href="#comparison">Dry run comparison</a>' : ''}`;
+
 const overall =
   failed > 0 || verdictCount('Failed') > 0
     ? ['bad', 'Failed']
@@ -158,8 +262,8 @@ input[type=search] { width: 100%; padding: 8px 10px; font: inherit; border: 1px 
 <main>
 <h1>Test validation report</h1>
 <p class="meta">${esc(manifest?.project ?? 'project')} &middot; generated ${esc(manifest?.generatedAt ?? new Date().toISOString())}</p>
-<div class="banner ${overall[0]}">Overall result: ${esc(overall[1])}</div>
-<nav><a href="#summary">Summary</a><a href="#run">Run details</a><a href="#matrix">Traceability</a><a href="#defects">Known defects</a><a href="#gaps">Gaps</a><a href="#results">All results</a><a href="#failures">Failures</a><a href="#integrity">Integrity</a></nav>
+${runBanner}<div class="banner ${overall[0]}">Overall result: ${esc(overall[1])}</div>
+<nav><a href="#summary">Summary</a><a href="#run">Run details</a><a href="#matrix">Traceability</a><a href="#defects">Known defects</a><a href="#gaps">Gaps</a><a href="#results">All results</a><a href="#failures">Failures</a>${extraNav}<a href="#integrity">Integrity</a></nav>
 
 <h2 id="summary">1. Summary</h2>
 <div class="cards">
@@ -232,7 +336,9 @@ ${
     : '<p>No test failed.</p>'
 }
 
-<h2 id="integrity">8. Integrity of the evidence</h2>
+${changeHtml}
+${comparisonHtml}
+<h2 id="integrity">${integrityNumber}. Integrity of the evidence</h2>
 <p>This report is part of the evidence pack. The file <code>SHA256SUMS</code> in the pack lists a checksum for every
 file in it, including this one. To check that nothing was changed, run <code>sha256sum -c SHA256SUMS</code> in the
 pack folder: every line should say OK. The report itself cannot contain its own checksum, so record the SHA-256
@@ -255,25 +361,29 @@ writeFileSync(outFile, html);
 console.log(`validation report: ${outFile} (${tests.length} results, ${rows.length} requirements)`);
 
 if (makePdf) {
-  // Chromium prints the same page. Needs `npx playwright install chromium`; only used for local, on-demand runs.
-  const require = createRequire(import.meta.url);
-  const { chromium } = require('@playwright/test');
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
-  await page.emulateMedia({ media: 'print' });
-  await page.setContent(html, { waitUntil: 'load' });
-  const pdfFile = outFile.replace(/\.html$/, '.pdf');
-  await page.pdf({
-    path: pdfFile,
-    format: 'A4',
-    landscape: true,
-    printBackground: true,
-    margin: { top: '14mm', bottom: '14mm', left: '12mm', right: '12mm' },
-    displayHeaderFooter: true,
-    headerTemplate: '<span></span>',
-    footerTemplate:
-      '<div style="width:100%;font-size:8px;color:#666;text-align:center;font-family:Arial">Test validation report &nbsp;|&nbsp; <span class="pageNumber"></span> / <span class="totalPages"></span></div>',
-  });
-  await browser.close();
-  console.log(`validation report: ${path.basename(pdfFile)} written`);
+  try {
+    // Chromium prints the same page. Needs `npx playwright install chromium`; only used for local, on-demand runs.
+    const require = createRequire(import.meta.url);
+    const { chromium } = require('@playwright/test');
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.emulateMedia({ media: 'print' });
+    await page.setContent(html, { waitUntil: 'load' });
+    const pdfFile = outFile.replace(/\.html$/, '.pdf');
+    await page.pdf({
+      path: pdfFile,
+      format: 'A4',
+      landscape: true,
+      printBackground: true,
+      margin: { top: '14mm', bottom: '14mm', left: '12mm', right: '12mm' },
+      displayHeaderFooter: true,
+      headerTemplate: '<span></span>',
+      footerTemplate:
+        '<div style="width:100%;font-size:8px;color:#666;text-align:center;font-family:Arial">Test validation report &nbsp;|&nbsp; <span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+    });
+    await browser.close();
+    console.log(`validation report: ${path.basename(pdfFile)} written`);
+  } catch (error) {
+    console.warn(`validation report: the PDF could not be made (${String(error.message).split('\n')[0]}).`);
+  }
 }

@@ -43,6 +43,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run format:check
+      - run: npm run test:tools
 
   e2e:
     name: E2E (${{ matrix.browser }})

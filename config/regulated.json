@@ -1,0 +1,29 @@
+{
+  "enabled": false,
+  "features": {
+    "runLabels": true,
+    "archive": true,
+    "compare": true,
+    "ciControls": true
+  },
+  "formalRun": {
+    "requireBuildId": true,
+    "requireCleanTree": true,
+    "requireDryRun": true,
+    "allowLocal": true,
+    "allowedRefs": ["refs/tags/*"]
+  },
+  "compare": {
+    "dryMustPass": true,
+    "requireSameBuild": true,
+    "requireSameCommit": true,
+    "requireSameTests": true,
+    "requireSameVerdicts": true
+  },
+  "archive": {
+    "directory": "reports/archive"
+  },
+  "changeRecord": {
+    "probes": []
+  }
+}

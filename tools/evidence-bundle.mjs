@@ -25,7 +25,17 @@ import {
 } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { rawAllureResults, rawJunit, regulatedDir } from './lib/paths.mjs';
+import { diffSnapshots, readNotes } from './lib/change-record.mjs';
+import { compareRuns, loadPack, writeComparison } from './lib/compare.mjs';
+import {
+  changeEndFile,
+  changeStartFile,
+  rawAllureResults,
+  rawJunit,
+  regulatedDir,
+  runInfoFile,
+} from './lib/paths.mjs';
+import { isActive, loadConfig } from './lib/regulated-config.mjs';
 
 const outDir = process.env.EVIDENCE_DIR ?? regulatedDir;
 const pdfFlag = process.argv.includes('--pdf') ? ' --pdf' : '';
@@ -118,7 +128,48 @@ const manifest = {
   },
   applicationImages: images,
 };
-writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+// 4b. Regulated run details. Only when regulated mode is on and the run was started with `npm run regulated:run`.
+const regulated = loadConfig();
+const runInfo =
+  isActive(regulated, 'runLabels') && existsSync(runInfoFile)
+    ? JSON.parse(readFileSync(runInfoFile, 'utf8'))
+    : null;
+if (runInfo) {
+  manifest.run = { ...runInfo, finishedAt: new Date().toISOString() };
+  manifest.regulatedConfig = {
+    source: regulated.source,
+    features: regulated.features,
+    formalRun: regulated.formalRun,
+    compare: regulated.compare,
+  };
+  if (existsSync(changeStartFile) && existsSync(changeEndFile)) {
+    const start = JSON.parse(readFileSync(changeStartFile, 'utf8'));
+    const end = JSON.parse(readFileSync(changeEndFile, 'utf8'));
+    manifest.changeRecord = { start, end, differences: diffSnapshots(start, end), notes: readNotes() };
+    writeFileSync(
+      path.join(outDir, 'change-record.json'),
+      JSON.stringify(manifest.changeRecord, null, 2) + '\n',
+    );
+  }
+}
+const writeManifest = () =>
+  writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+writeManifest();
+
+// 4c. A formal run is checked against the accepted dry run, before the report is built so the report shows it.
+const againstAt = process.argv.indexOf('--against');
+const against = againstAt >= 0 ? process.argv[againstAt + 1] : null;
+if (against && runInfo?.type === 'formal' && isActive(regulated, 'compare')) {
+  const result = compareRuns(await loadPack(against), await loadPack(outDir), regulated.compare);
+  writeComparison(path.join(outDir, 'comparison'), result, { against: path.basename(against) });
+  manifest.comparison = {
+    against: path.basename(against),
+    ok: result.ok,
+    failed: result.checks.filter((c) => !c.ok && c.severity !== 'warn').map((c) => c.id),
+  };
+  writeManifest();
+  if (!result.ok) process.exitCode = 3;
+}
 
 // 5. The single-file report, before the checksums are made so it is covered by them.
 execSync(
@@ -127,10 +178,30 @@ execSync(
 );
 
 // 6. A short note for whoever opens the folder.
+const runLines = runInfo
+  ? [
+      '',
+      `RUN TYPE: ${runInfo.type.toUpperCase()}${runInfo.type === 'dry' ? ' (a rehearsal, not audit evidence)' : ''}`,
+      `BUILD:    ${runInfo.buildId}`,
+      ...(runInfo.executionId ? [`EXECUTION: ${runInfo.executionId}`] : []),
+      ...(manifest.comparison && !manifest.comparison.ok
+        ? ['NOT ACCEPTED: this formal run differs from the dry run it was compared with (see comparison/).']
+        : []),
+    ]
+  : [];
+const extraFiles = [
+  ...(manifest.changeRecord
+    ? [
+        '  change-record.json       what the code and configuration looked like at the start and end, and the notes',
+      ]
+    : []),
+  ...(manifest.comparison ? ['  comparison/              the check against the accepted dry run'] : []),
+];
 writeFileSync(
   path.join(outDir, 'READ-ME-FIRST.txt'),
   [
     'REGULATED EVIDENCE PACK',
+    ...runLines,
     '',
     'This folder is the validation evidence of one test run. It is different from the everyday reports in',
     'reports/standard, which are for developers and carry no checksums or traceability.',
@@ -148,6 +219,7 @@ writeFileSync(
     '  allure-results/          the raw results, including every screenshot, video and trace',
     '  junit.xml                machine-readable results',
     '  manifest.json            commit, who ran it, tool versions, lock-file hash, application image digests',
+    ...extraFiles,
     '  SHA256SUMS               a checksum for every file in this folder',
     '',
     'To check that nothing has been changed, run this in this folder (every line must say OK):',
