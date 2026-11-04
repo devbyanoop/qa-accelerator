@@ -206,7 +206,7 @@ covers conventions for new tests.
 
 ## About
 
-Built by [devbyanoop](https://github.com/devbyanoop), a test automation engineer with 16 years in the field.
+Built by [devbyanoop](https://github.com/devbyanoop), a test automation engineer with 17+ years in the field.
 I take on freelance automation work, from framework design to getting a team's suite running reliably in CI.
 
 ## License
