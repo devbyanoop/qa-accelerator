@@ -4,7 +4,7 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     groups:
       dev-tooling:
         patterns: ['*']
@@ -12,6 +12,9 @@ updates:
     ignore:
       # Playwright is upgraded by hand together with the Dockerfile image tag and the visual baselines.
       - dependency-name: '@playwright/test'
+      # Major jumps (eslint, @types/node, dotenv, ...) are reviewed by hand, not proposed automatically.
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /

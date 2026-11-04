@@ -1,4 +1,4 @@
-﻿# QA Accelerator
+# QA Accelerator
 
 A Playwright + TypeScript starting point for end-to-end test automation. It covers UI and API testing in one
 project, keeps test data clean after itself, and produces reports you can hand to a client or a team lead.
@@ -8,6 +8,9 @@ client work. To keep it honest, it runs against a real open-source shop, [Toolsh
 rather than a toy login page. Swapping in your own application is mostly a matter of replacing the page
 objects and API clients (see "Using it on your own application" below).
 
+[![QA Accelerator CI](https://github.com/devbyanoop/qa-accelerator/actions/workflows/playwright.yml/badge.svg)](https://github.com/devbyanoop/qa-accelerator/actions/workflows/playwright.yml)
+[![Live report](https://img.shields.io/badge/Allure-live%20report-blue)](https://devbyanoop.github.io/qa-accelerator/)
+
 ![Allure report overview](docs/images/allure-overview.png)
 
 | Tests grouped by area                       | A single test, step by step                               |
@@ -15,6 +18,9 @@ objects and API clients (see "Using it on your own application" below).
 | ![Allure tree](docs/images/allure-tree.png) | ![Allure test detail](docs/images/allure-test-detail.png) |
 
 ## What it does
+
+You can browse the report from the latest run on `main` without installing anything:
+[devbyanoop.github.io/qa-accelerator](https://devbyanoop.github.io/qa-accelerator/).
 
 There are 80 tests by default and 83 if you switch on the visual checks. Each one is tagged, so you can run
 only the slice you care about.
