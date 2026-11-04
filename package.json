@@ -22,7 +22,7 @@
     "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.49.0",
-    "@types/node": "^20.14.0",
+    "@types/node": "^26.6.6",
     "allure": "^3.22.1",
     "allure-js-commons": "^3.14.0",
     "allure-playwright": "^3.14.0",
