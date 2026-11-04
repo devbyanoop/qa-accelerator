@@ -160,6 +160,7 @@ const env = manifest?.environment ?? {};
 const runDetails = manifest
   ? [
       detail('Project', esc(manifest.project)),
+      detail('Framework version', esc(manifest.frameworkVersion ?? 'not recorded')),
       detail('Commit', `<code>${esc(manifest.commit)}</code>`),
       detail('Branch', esc(manifest.branch)),
       detail('Trigger', esc(manifest.trigger)),

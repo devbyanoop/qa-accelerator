@@ -22,11 +22,13 @@ function writePack({
   tests,
   verdicts,
   images = ['img@1'],
+  frameworkVersion = '1.0.0',
 } = {}) {
   const dir = mkdtempSync(path.join(tmpdir(), 'pack-'));
   mkdirSync(path.join(dir, 'traceability'));
   const manifest = {
     commit,
+    frameworkVersion,
     run: { type, buildId: build },
     environment: { node: 'v20', playwright: '1.64' },
     applicationImages: images,
@@ -125,5 +127,14 @@ test('a different commit with identical scripts is only a warning', async () => 
   assert.equal(commit.ok, false);
   assert.equal(commit.severity, 'warn');
   assert.match(commit.detail, /scripts are identical/);
+  assert.equal(result.ok, true);
+});
+
+test('a different framework version is a warning, not a failure', async () => {
+  const result = await compare({}, { frameworkVersion: '1.1.0' });
+  const framework = result.checks.find((c) => c.id === 'framework');
+  assert.equal(framework.ok, false);
+  assert.equal(framework.severity, 'warn');
+  assert.match(framework.detail, /1\.0\.0 and 1\.1\.0/);
   assert.equal(result.ok, true);
 });

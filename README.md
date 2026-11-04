@@ -368,8 +368,47 @@ The full, step-by-step version is in [docs/adapting-to-your-application.pdf](doc
 3. Keep `src/config` (apart from the role list and the global setup), `src/fixtures/base.fixture.ts`,
    `src/utils`, `tools/` (apart from `start-app.mjs`) and `config/`. They are application-agnostic.
 
+### Starting from the GitHub template
+
+On the repository page, press **Use this template** to create your own repository, public or private, with a clean
+history. Then:
+
+1. Change what still points at this project: the owner in `.github/CODEOWNERS`, the copyright holder in `LICENSE`, the
+   badges and clone links in the README, the contact in `.github/SECURITY.md`, and the name, author and repository in
+   `package.json`.
+2. Add the four credential secrets the workflow needs (see "Continuous integration").
+3. Follow the adapting guide for the page objects, API clients and data.
+
+A copy made from a template shares no history with this repository, so a plain merge of later changes does not work.
+To follow later releases, add this repository as a second remote and compare the release tags:
+
+```
+git remote add upstream https://github.com/devbyanoop/qa-accelerator.git
+git fetch upstream --tags
+git diff v1.0.0 v1.1.0 -- tools config .github
+```
+
+[CHANGELOG.md](CHANGELOG.md) says what changed in each release, and which changes can break an existing setup.
+
 [ARCHITECTURE.pdf](docs/ARCHITECTURE.pdf) explains how the pieces fit together and [CONTRIBUTING.md](.github/CONTRIBUTING.md)
 covers conventions for new tests. For the story behind the project, see the [case study](docs/case-study.pdf).
+
+## Releases and security
+
+**Releases.** The project follows [semantic versioning](https://semver.org), and every release is tagged `vX.Y.Z`. A
+release page has the notes from [CHANGELOG.md](CHANGELOG.md), a zip of the PDF guides, a software bill of materials
+(CycloneDX), checksums, and build provenance, which proves the files were built from this repository:
+
+```
+gh attestation verify qa-accelerator-guides-1.0.0.zip --repo devbyanoop/qa-accelerator
+```
+
+A regulated run records the framework version in its manifest and report, so an evidence pack always says which release
+produced it.
+
+**Supply chain.** Every GitHub Action is pinned to a full commit (`npm run pin:actions`, checked in CI by
+`npm run check:actions`), and Dependabot keeps them current. CodeQL scans the code and the workflows on every push and
+weekly. The security policy is in [.github/SECURITY.md](.github/SECURITY.md).
 
 ## About
 

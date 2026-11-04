@@ -1,8 +1,29 @@
 {
   "name": "qa-accelerator",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Playwright + TypeScript end-to-end test automation framework: UI and API tests, reporting and CI",
+  "license": "MIT",
+  "author": "devbyanoop (https://github.com/devbyanoop)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devbyanoop/qa-accelerator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/devbyanoop/qa-accelerator/issues"
+  },
+  "homepage": "https://github.com/devbyanoop/qa-accelerator#readme",
+  "keywords": [
+    "playwright",
+    "typescript",
+    "test-automation",
+    "e2e-testing",
+    "api-testing",
+    "allure",
+    "qa",
+    "regulated",
+    "traceability"
+  ],
   "scripts": {
     "test": "playwright test",
     "test:smoke": "playwright test --grep @smoke",
@@ -25,6 +46,8 @@
     "regulated:verify": "node tools/regulated-verify.mjs",
     "regulated:note": "node tools/regulated-note.mjs",
     "test:tools": "node --test tools/",
+    "pin:actions": "node tools/pin-actions.mjs",
+    "check:actions": "node tools/pin-actions.mjs --check",
     "docs:pdf": "node tools/docs-to-pdf.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",

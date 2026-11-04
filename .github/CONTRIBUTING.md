@@ -105,6 +105,27 @@ including every way to switch recording on, is in [docs/reporting.pdf](../docs/r
 - **Visual:** compare only static components. Baselines are generated in the Linux runner image; see "Visual
   regression" in the README before changing them.
 
+## Releasing
+
+For the maintainer. A release is a tag, and the release workflow does the rest.
+
+1. Put the changes in `CHANGELOG.md` under `## [Unreleased]`, then rename that heading to the new version and date, and
+   add a fresh empty `## [Unreleased]` above it.
+2. Set the version in `package.json` (`npm version X.Y.Z --no-git-tag-version`), commit, and push.
+3. Tag and push the tag: `git tag -a vX.Y.Z -m "X.Y.Z"` and `git push origin vX.Y.Z`.
+4. The **Release** workflow checks that the tag matches `package.json`, runs the checks, builds the assets (the guides
+   as a zip, a software bill of materials, checksums), records build provenance and creates the GitHub Release with the
+   notes from the changelog. A tag with a dash, such as `v1.1.0-rc1`, is published as a pre-release.
+
+Follow semantic versioning (see the top of `CHANGELOG.md`): a change to an npm script, a setting in
+`config/regulated.json`, a folder under `reports/` or a workflow input is a breaking change.
+
+## GitHub Actions
+
+Every action in `.github/workflows` is pinned to a full commit, with the version in a comment. When you add or change
+an action, write it as usual (`uses: owner/name@v4`), then run `npm run pin:actions` to pin it. CI runs
+`npm run check:actions` and fails on an unpinned action. Dependabot updates pinned actions.
+
 ## Before opening a PR
 
 ```

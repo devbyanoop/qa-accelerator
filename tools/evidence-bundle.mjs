@@ -111,6 +111,7 @@ const images = existsSync(composeFile)
 const manifest = {
   generatedAt: new Date().toISOString(),
   project: pkg.name,
+  frameworkVersion: pkg.version,
   commit: process.env.GITHUB_SHA ?? run('git rev-parse HEAD'),
   branch: process.env.GITHUB_REF_NAME ?? run('git rev-parse --abbrev-ref HEAD'),
   trigger: process.env.GITHUB_EVENT_NAME ?? 'local',

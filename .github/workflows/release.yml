@@ -1,0 +1,84 @@
+name: Release
+
+# Runs when a version tag is pushed, for example:  git tag -a v1.0.0 -m "1.0.0" && git push origin v1.0.0
+# Checks the code, builds the release assets (the PDF guides, a software bill of materials, checksums), records build
+# provenance for them and creates the GitHub Release with the notes from CHANGELOG.md.
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: The tag must match the version in package.json
+        run: |
+          expected="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$expected" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json ($expected). Fix one of them and tag again."
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm run check:actions
+      - run: npm run test:tools
+
+  release:
+    name: Build and publish the release
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # create the release
+      id-token: write # sign the build provenance
+      attestations: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Release notes from the changelog
+        run: node tools/release-notes.mjs "${GITHUB_REF_NAME#v}" > release-notes.md
+
+      - name: Build the release assets
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          mkdir dist
+          # the guides in docs/ are published as PDF
+          (cd docs && zip -r "../dist/qa-accelerator-guides-${version}.zip" . -i '*.pdf')
+          # software bill of materials of the dependencies, from the lock file
+          npx --yes @cyclonedx/cyclonedx-npm@6.0.1 --output-format JSON --output-file dist/sbom.cdx.json
+          (cd dist && sha256sum * > SHA256SUMS)
+          ls -la dist
+
+      - name: Record build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-path: dist/*
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=""
+          case "$GITHUB_REF_NAME" in *-*) flags="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "QA Accelerator ${GITHUB_REF_NAME#v}" \
+            --notes-file release-notes.md \
+            --verify-tag $flags

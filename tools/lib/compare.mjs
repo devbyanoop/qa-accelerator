@@ -144,6 +144,14 @@ export function compareRuns(dry, formal, rules) {
     'warn',
   );
 
+  add(
+    'framework',
+    'The framework version is the same',
+    dry.manifest.frameworkVersion === formal.manifest.frameworkVersion,
+    `${dry.manifest.frameworkVersion ?? 'not recorded'} and ${formal.manifest.frameworkVersion ?? 'not recorded'}`,
+    'warn',
+  );
+
   if (rules.requireSameTests) {
     const a = tests(dry);
     const b = tests(formal);
