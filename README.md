@@ -219,6 +219,8 @@ images in `infra/toolshop/docker-compose.yml` are pinned by digest, and the file
 
 ## Using it on your own application
 
+The full, step-by-step version is in [docs/adapting-to-your-application.md](docs/adapting-to-your-application.md). In short:
+
 1. Add a `.env.<profile>` file for each of your environments.
 2. Replace the contents of `src/pages`, the domain clients in `src/api` and `src/data` with your own.
 3. Leave `src/config`, `src/fixtures/base.fixture.ts` and `src/utils` alone. They are application-agnostic.
