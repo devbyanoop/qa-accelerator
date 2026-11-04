@@ -111,5 +111,6 @@ including every way to switch recording on, is in [docs/reporting.pdf](../docs/r
 npm run lint
 npm run typecheck
 npm run format:check
+npm run test:tools
 npm run test:smoke
 ```

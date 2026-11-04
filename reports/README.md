@@ -30,6 +30,13 @@ A normal run keeps a screenshot and a video only for tests that fail, so a green
 records every test. The ways to switch recording on, and what "every step" means, are in
 [../docs/reporting.pdf](../docs/reporting.pdf).
 
+## Sealed archives
+
+In regulated mode, `npm run regulated:run` seals each dry and formal run as a zip in `reports/archive/`, with a
+`.sha256` file and an audit log. Nothing in there is overwritten, and it is git-ignored like everything else under
+`reports/`: copy an approved archive into your records. `npm run clean` removes it too, so keep copies of what
+matters first.
+
 ## Starting clean
 
 `npm run clean` removes everything under `reports/`. `npm run test:capture` clears `_raw` for you before it runs,

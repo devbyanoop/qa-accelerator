@@ -300,6 +300,31 @@ the kinds of requirement quality teams in each field usually ask to see covered:
 | Evidence reviewers expect | dated screenshots and video of case processing, audit-trail rows read from the database, a requirement-to-result matrix                                                    | dated screenshots and video of the transaction, ledger rows read from the database, a requirement-to-result matrix                                |
 | What helps here           | `requirement()` tags, the read-only database layer for audit-trail and ledger checks, `--strict` as a pipeline gate                                                        | the same                                                                                                                                          |
 
+### Dry run and formal run
+
+Pharmacovigilance and banking teams often test twice. A **dry run** checks the scripts against the final build so
+nothing surprises the team later. A **formal run** then executes the same scripts against the same build and records
+the evidence that is kept for audit. This is built in, and it is also opt-in: it stays off until
+`"enabled": true` is set in `config/regulated.json`.
+
+```
+npm run regulated:run -- --type dry --build 2.4.1
+npm run regulated:run -- --type formal --build 2.4.1 --against reports/archive/DRY-2.4.1-<time>.zip
+```
+
+- **Run labels:** the run type and build appear in the manifest, a banner at the top of the report and on every
+  screenshot and video frame.
+- **One sealed zip:** the whole evidence pack, with a `.sha256` file, never overwritten. Store both in Xray and
+  SharePoint. `npm run regulated:verify -- <zip>` checks one years later.
+- **Comparison:** a formal run is checked against its accepted dry run (same build, same scripts, same tests, same
+  verdict for every requirement). One that differs is not sealed.
+- **Change record:** the git state, a fingerprint of the code and configuration, and optional application probes at
+  the start and the end, plus notes added with `npm run regulated:note` for anything done by hand during the run.
+- **In CI:** a manual workflow with a protected `formal-validation` environment, where formal runs start from a
+  release tag only.
+
+Full guide: [docs/regulated/dry-run-and-formal-run.pdf](docs/regulated/dry-run-and-formal-run.pdf).
+
 ### What it does not do
 
 The pack supports validation; it does not make a system compliant by itself. Compliance depends on the client's
