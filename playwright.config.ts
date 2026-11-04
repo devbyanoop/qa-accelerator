@@ -6,7 +6,7 @@ import { env } from './src/config/env';
 const allureReporter: ReporterDescription = [
   'allure-playwright',
   {
-    resultsDir: 'allure-results',
+    resultsDir: 'reports/_raw/allure-results',
     environmentInfo: {
       Application: env.appName,
       Environment: env.name,
@@ -44,6 +44,8 @@ function projectFor(name: string): Project {
 
 export default defineConfig({
   testDir: './tests',
+  // Screenshots, videos and traces of a run. Everything generated lives under reports/ (see reports/README.md).
+  outputDir: 'reports/_raw/test-results',
   globalSetup: './src/config/global-setup.ts',
   fullyParallel: true,
   forbidOnly: env.isCI,
@@ -55,8 +57,8 @@ export default defineConfig({
   expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: 'disabled' } },
   reporter: [
     env.isCI ? ['github'] : ['list'],
-    ['html', { open: 'never' }],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
+    ['html', { open: 'never', outputFolder: 'reports/standard/playwright' }],
+    ['junit', { outputFile: 'reports/_raw/junit.xml' }],
     allureReporter,
   ],
   use: {

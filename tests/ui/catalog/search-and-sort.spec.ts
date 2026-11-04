@@ -1,8 +1,9 @@
 import { expect, test } from '@fixtures/app.fixture';
 import { isSortedAscending, isSortedDescending } from '@utils/sorting';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Catalog', () => {
+test.describe('Catalog', { tag: [...requirement('REQ-CAT-001')] }, () => {
   test('products are shown on the landing page', { tag: [Tags.smoke, Tags.ui] }, async ({ homePage }) => {
     await homePage.goto();
 

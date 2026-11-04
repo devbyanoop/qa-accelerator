@@ -1,0 +1,94 @@
+[
+  {
+    "id": "REQ-AUTH-001",
+    "title": "A registered customer can sign in with valid credentials",
+    "area": "Authentication",
+    "risk": "high"
+  },
+  {
+    "id": "REQ-AUTH-002",
+    "title": "Invalid credentials are rejected",
+    "area": "Authentication",
+    "risk": "high"
+  },
+  {
+    "id": "REQ-AUTH-003",
+    "title": "Account pages require a signed-in user",
+    "area": "Authentication",
+    "risk": "high"
+  },
+  {
+    "id": "REQ-SEC-001",
+    "title": "Administrative functions are restricted to the admin role",
+    "area": "Security",
+    "risk": "high"
+  },
+  {
+    "id": "REQ-SEC-002",
+    "title": "Passwords are stored hashed, never in plain text",
+    "area": "Security",
+    "risk": "high"
+  },
+  {
+    "id": "REQ-CAT-001",
+    "title": "Customers can search and sort the product catalog",
+    "area": "Catalog",
+    "risk": "medium"
+  },
+  {
+    "id": "REQ-CAT-002",
+    "title": "The catalog is paged without repeating or losing products",
+    "area": "Catalog",
+    "risk": "medium"
+  },
+  { "id": "REQ-CART-001", "title": "Customers can add products to a cart", "area": "Cart", "risk": "medium" },
+  {
+    "id": "REQ-ORD-001",
+    "title": "A customer can place an order and pay by each supported method",
+    "area": "Orders",
+    "risk": "high"
+  },
+  {
+    "id": "REQ-ORD-002",
+    "title": "A placed order is stored completely and accurately",
+    "area": "Orders",
+    "risk": "high"
+  },
+  {
+    "id": "REQ-ORD-003",
+    "title": "Address and payment details are validated before an order is accepted",
+    "area": "Orders",
+    "risk": "high"
+  },
+  {
+    "id": "REQ-ORD-004",
+    "title": "An order cannot be placed for an empty cart",
+    "area": "Orders",
+    "risk": "medium"
+  },
+  {
+    "id": "REQ-ORD-005",
+    "title": "The customer receives an order confirmation email",
+    "area": "Orders",
+    "risk": "medium"
+  },
+  {
+    "id": "REQ-ADM-001",
+    "title": "An admin can manage brands, products, users and view orders",
+    "area": "Administration",
+    "risk": "medium"
+  },
+  {
+    "id": "REQ-A11Y-001",
+    "title": "Main pages meet WCAG 2.1 A/AA",
+    "area": "Accessibility",
+    "risk": "medium"
+  },
+  { "id": "REQ-API-001", "title": "API responses keep their agreed shape", "area": "API", "risk": "medium" },
+  {
+    "id": "REQ-UX-001",
+    "title": "Core customer flows work on a phone-sized screen",
+    "area": "Usability",
+    "risk": "low"
+  }
+]

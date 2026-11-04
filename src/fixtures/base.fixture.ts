@@ -2,6 +2,7 @@ import { test as base, request } from '@playwright/test';
 import type { APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { env } from '@config/env';
+import { currentCommit, installTimestampOverlay } from '@utils/evidence-stamp';
 import { Tags } from '@utils/tags';
 
 interface FrameworkFixtures {
@@ -20,6 +21,16 @@ export const test = base.extend<FrameworkFixtures>({
     });
     await use(context);
     await context.dispose();
+  },
+
+  // With EVIDENCE_STAMP=true every page shows a live clock, so screenshots and videos carry their own timestamp.
+  // Only wraps the context, so API-only tests still never start a browser.
+  context: async ({ context }, use, testInfo) => {
+    if (env.stamp) {
+      const label = `${currentCommit()}  |  ${testInfo.project.name}  |  ${testInfo.title}`;
+      await context.addInitScript(installTimestampOverlay, { label });
+    }
+    await use(context);
   },
 
   // Layer comes from the @api tag, feature from the describe title, severity from the @smoke tag.

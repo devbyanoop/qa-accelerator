@@ -1,7 +1,8 @@
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Catalog pagination API', () => {
+test.describe('Catalog pagination API', { tag: [...requirement('REQ-CAT-002')] }, () => {
   test(
     'consecutive pages do not repeat products',
     { tag: [Tags.regression, Tags.api] },

@@ -7,12 +7,19 @@
     "test": "playwright test",
     "test:smoke": "playwright test --grep @smoke",
     "test:regression": "playwright test --grep @regression",
-    "app:start": "node scripts/start-app.mjs",
-    "app:stop": "node scripts/start-app.mjs --stop",
-    "report": "playwright show-report",
-    "report:allure:generate": "allure generate allure-results --clean",
-    "report:allure:open": "allure open",
+    "test:capture": "node tools/clean-reports.mjs raw && playwright test --config=playwright.capture.config.ts",
+    "app:start": "node tools/start-app.mjs",
+    "app:stop": "node tools/start-app.mjs --stop",
+    "report": "playwright show-report reports/standard/playwright",
+    "report:allure:generate": "allure generate reports/_raw/allure-results --clean --config config/allurerc.mjs",
+    "report:allure:open": "allure open reports/standard/allure",
     "report:allure": "npm run report:allure:generate && npm run report:allure:open",
+    "report:validation": "node tools/evidence-bundle.mjs --pdf",
+    "report:validation:open": "allure open reports/regulated/allure",
+    "traceability": "node tools/traceability.mjs",
+    "evidence": "node tools/evidence-bundle.mjs",
+    "clean": "node tools/clean-reports.mjs",
+    "docs:pdf": "node tools/docs-to-pdf.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -31,6 +38,7 @@
     "eslint": "^9.39.5",
     "eslint-plugin-playwright": "^2.12.2",
     "lint-staged": "^17.6.0",
+    "marked": "^12.0.2",
     "mysql2": "^3.24.6",
     "prettier": "^3.9.10",
     "simple-git-hooks": "^2.14.0",
@@ -49,5 +57,10 @@
       "prettier --write"
     ],
     "*.{json,md,yml,yaml}": "prettier --write"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 110,
+    "trailingComma": "all"
   }
 }

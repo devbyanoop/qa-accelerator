@@ -11,6 +11,7 @@ export default tseslint.config(
       'blob-report',
       'allure-report',
       'allure-results',
+      'reports',
       '.allure',
       '.auth',
     ],
@@ -20,7 +21,7 @@ export default tseslint.config(
   { files: ['tests/**/*.ts'], ...playwright.configs['flat/recommended'] },
   {
     // Plain Node scripts: declare the Node globals they use.
-    files: ['scripts/**/*.mjs'],
+    files: ['tools/**/*.mjs'],
     languageOptions: {
       globals: { process: 'readonly', console: 'readonly', fetch: 'readonly', AbortSignal: 'readonly' },
     },

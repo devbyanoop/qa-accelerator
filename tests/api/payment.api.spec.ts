@@ -1,8 +1,9 @@
 import { invalidPaymentSamples, paymentSamples } from '@data/checkout-data';
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Payment check API', () => {
+test.describe('Payment check API', { tag: [...requirement('REQ-ORD-003')] }, () => {
   for (const payment of paymentSamples()) {
     test(
       `accepts valid ${payment.method} details`,

@@ -1,7 +1,8 @@
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Admin users', () => {
+test.describe('Admin users', { tag: [...requirement('REQ-ADM-001')] }, () => {
   test(
     'an admin can create a user',
     { tag: [Tags.smoke, Tags.ui] },

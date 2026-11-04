@@ -1,7 +1,8 @@
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Catalog pagination', () => {
+test.describe('Catalog pagination', { tag: [...requirement('REQ-CAT-002')] }, () => {
   test('the pager starts on page 1', { tag: [Tags.smoke, Tags.ui] }, async ({ homePage }) => {
     await homePage.goto();
 

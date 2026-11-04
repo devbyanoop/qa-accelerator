@@ -1,0 +1,13 @@
+# Changes to these paths need a review from the listed owner once "Require review from Code Owners" is switched on
+# in the branch protection rule (see docs/regulated/repository-controls.pdf).
+
+# Test code and the framework itself
+/src/ @devbyanoop
+/tests/ @devbyanoop
+
+# What defines "validated": the requirement list, the pipeline and the evidence tools
+/docs/regulated/ @devbyanoop
+/tools/ @devbyanoop
+/config/ @devbyanoop
+/.github/ @devbyanoop
+/infra/ @devbyanoop

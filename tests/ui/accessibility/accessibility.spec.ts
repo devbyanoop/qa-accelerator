@@ -1,5 +1,6 @@
 import { expect, test } from '@fixtures/app.fixture';
 import { newViolations, scanAccessibility } from '@utils/accessibility';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
 /**
@@ -14,7 +15,7 @@ const knownViolations = {
   adminDashboard: ['label-content-name-mismatch'],
 };
 
-test.describe('Accessibility (WCAG 2.1 A/AA)', () => {
+test.describe('Accessibility (WCAG 2.1 A/AA)', { tag: [...requirement('REQ-A11Y-001')] }, () => {
   // Analysing a whole page with axe is slow, especially in Firefox.
   test.describe.configure({ timeout: 60_000 });
 

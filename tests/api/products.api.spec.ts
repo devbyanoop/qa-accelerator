@@ -1,8 +1,9 @@
 import { expect, test } from '@fixtures/app.fixture';
 import { isSortedAscending } from '@utils/sorting';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Products API', () => {
+test.describe('Products API', { tag: [...requirement('REQ-CAT-001')] }, () => {
   test(
     'lists products with pagination metadata',
     { tag: [Tags.smoke, Tags.api] },

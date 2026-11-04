@@ -2,6 +2,7 @@ import { credentialsFor } from '@config/env';
 import { expect, test } from '@fixtures/app.fixture';
 import { shapeProblems } from '@utils/contract';
 import type { FieldType } from '@utils/contract';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
 // What the front end and the other tests rely on. A renamed field or a changed type should fail here, with a
@@ -24,7 +25,7 @@ const pageShape: Record<string, FieldType> = {
   data: 'array',
 };
 
-test.describe('API contract', () => {
+test.describe('API contract', { tag: [...requirement('REQ-API-001')] }, () => {
   test(
     'a product list matches the expected shape',
     { tag: [Tags.regression, Tags.api] },

@@ -1,6 +1,7 @@
 import { env } from '@config/env';
 import { sampleAddress } from '@data/checkout-data';
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
 // These look at what the application really stored, which the API and the screen can't prove on their own.
@@ -11,7 +12,7 @@ test.describe('Database integrity', () => {
 
   test(
     'a placed order is stored with its items and payment',
-    { tag: [Tags.regression, Tags.db] },
+    { tag: [Tags.regression, Tags.db, ...requirement('REQ-ORD-002')] },
     async ({ invoicesApi, postcodeApi, customerToken, seededCart, toolshopDb }) => {
       const address = await postcodeApi.lookup(
         sampleAddress.country,
@@ -51,7 +52,7 @@ test.describe('Database integrity', () => {
 
   test(
     'a registered user is stored with a hashed password',
-    { tag: [Tags.regression, Tags.db] },
+    { tag: [Tags.regression, Tags.db, ...requirement('REQ-SEC-002')] },
     async ({ seededUser, toolshopDb }) => {
       const row = await toolshopDb.userByEmail(seededUser.email);
 
@@ -64,7 +65,7 @@ test.describe('Database integrity', () => {
 
   test(
     'deleting a product removes its row',
-    { tag: [Tags.regression, Tags.db] },
+    { tag: [Tags.regression, Tags.db, ...requirement('REQ-ADM-001')] },
     async ({ productsApi, adminToken, seededProduct, toolshopDb }) => {
       expect(await toolshopDb.productCount(seededProduct.name)).toBe(1);
 

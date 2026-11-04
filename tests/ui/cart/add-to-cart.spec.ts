@@ -1,7 +1,8 @@
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Cart', () => {
+test.describe('Cart', { tag: [...requirement('REQ-CART-001')] }, () => {
   test(
     'adding a product updates the cart badge and total',
     { tag: [Tags.smoke, Tags.ui] },

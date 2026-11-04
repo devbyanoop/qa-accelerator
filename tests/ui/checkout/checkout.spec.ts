@@ -1,9 +1,10 @@
 import { credentialsFor } from '@config/env';
 import { invalidPaymentSamples, paymentSamples, sampleAddress } from '@data/checkout-data';
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Checkout', () => {
+test.describe('Checkout', { tag: [...requirement('REQ-ORD-001', 'REQ-ORD-003')] }, () => {
   for (const payment of paymentSamples()) {
     const tag = payment.method === 'cash-on-delivery' ? Tags.smoke : Tags.regression;
 

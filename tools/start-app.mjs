@@ -1,7 +1,7 @@
 // Starts the application under test with Docker, seeds its database and waits until it is ready.
 // Node built-ins only, so it works on Windows, macOS and Linux and needs no `npm install` first.
-//   node scripts/start-app.mjs          start and seed
-//   node scripts/start-app.mjs --stop   stop and remove the containers and data
+//   node tools/start-app.mjs          start and seed
+//   node tools/start-app.mjs --stop   stop and remove the containers and data
 import { spawnSync } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
 

@@ -24,6 +24,18 @@ formatting problems are fixed before they reach the pull request.
 - **No hard waits:** never use `waitForTimeout`; rely on web-first assertions. When the thing you wait for is
   an API result, use `expect.poll`.
 
+## Requirement links
+
+Link each test to the requirement it verifies, so the traceability matrix stays complete:
+
+```ts
+test('a customer can sign in', { tag: [Tags.smoke, Tags.ui, ...requirement('REQ-AUTH-001')] }, ...)
+test.describe('Checkout', { tag: [...requirement('REQ-ORD-001', 'REQ-ORD-003')] }, () => { ... })
+```
+
+The valid IDs are in `docs/regulated/requirements.json`. `npm run traceability` lists tests with no requirement
+and IDs that are not in the file.
+
 ## Test data
 
 - **Never depend on data that other tests change.** Tests run in parallel against one application, so a
@@ -73,6 +85,18 @@ is fixed, which is the signal to remove the tag.
 `tests/db` reads the application's database through `src/db/toolshop-db.ts`. Keep it read-only: create data
 through the API, then look at what was stored. Put new queries in `ToolshopDb` rather than in specs, and skip
 the spec when `env.db` is not set, as the existing ones do.
+
+## Recording evidence
+
+The defaults are economical: a screenshot and a video are kept only for failing tests. `npm run test:capture`
+records a screenshot, a video and a trace for every test and stamps a live date-and-time bar on each page
+(`src/utils/evidence-stamp.ts`). It is meant for formal validation runs and demos, not everyday runs. The bar
+ignores the pointer and lives in a closed shadow root, so it does not affect locators or clicks. Don't add checks
+that depend on the bottom edge of the page being free.
+
+Reports are split into `reports/standard` (everyday) and `reports/regulated` (validation evidence, built on
+request). Don't change where tests or tools write; everything generated goes under `reports/`. The full guide,
+including every way to switch recording on, is in [docs/reporting.pdf](../docs/reporting.pdf).
 
 ## Accessibility and visual checks
 

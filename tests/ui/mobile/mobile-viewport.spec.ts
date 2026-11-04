@@ -1,9 +1,10 @@
 import { credentialsFor } from '@config/env';
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
 // Runs only in the "mobile-chrome" project (BROWSERS=mobile-chrome), a phone-sized Chrome. See playwright.config.ts.
-test.describe('Mobile viewport', () => {
+test.describe('Mobile viewport', { tag: [...requirement('REQ-UX-001')] }, () => {
   test(
     'products are shown on a phone',
     { tag: [Tags.regression, Tags.ui, Tags.mobile] },

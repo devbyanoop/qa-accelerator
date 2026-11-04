@@ -42,6 +42,8 @@ export const env = {
    * when asked: VISUAL=true. Other operating systems render fonts differently and would never match.
    */
   visual: process.env.VISUAL === 'true',
+  /** Burn a live date-and-time bar into every page, so screenshots and videos show when they were taken. */
+  stamp: process.env.EVIDENCE_STAMP === 'true',
   /**
    * Direct, read-only access to the application's database, for the checks in tests/db. Set DB_HOST (and the
    * other DB_ values) to enable them; without DB_HOST those tests are skipped.

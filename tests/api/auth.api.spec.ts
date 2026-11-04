@@ -1,21 +1,30 @@
 import { credentialsFor } from '@config/env';
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
 test.describe('Auth API', () => {
-  test('valid credentials return a bearer token', { tag: [Tags.smoke, Tags.api] }, async ({ authApi }) => {
-    const { email, password } = credentialsFor('customer');
+  test(
+    'valid credentials return a bearer token',
+    { tag: [Tags.smoke, Tags.api, ...requirement('REQ-AUTH-001')] },
+    async ({ authApi }) => {
+      const { email, password } = credentialsFor('customer');
 
-    const response = await authApi.login(email, password);
+      const response = await authApi.login(email, password);
 
-    expect(response.token_type).toBe('bearer');
-    expect(response.access_token).toBeTruthy();
-    expect(response.expires_in).toBeGreaterThan(0);
-  });
+      expect(response.token_type).toBe('bearer');
+      expect(response.access_token).toBeTruthy();
+      expect(response.expires_in).toBeGreaterThan(0);
+    },
+  );
 
-  test('a wrong password is rejected with 401', { tag: [Tags.regression, Tags.api] }, async ({ authApi }) => {
-    const { email } = credentialsFor('customer');
+  test(
+    'a wrong password is rejected with 401',
+    { tag: [Tags.regression, Tags.api, ...requirement('REQ-AUTH-002')] },
+    async ({ authApi }) => {
+      const { email } = credentialsFor('customer');
 
-    expect(await authApi.loginStatus(email, 'not-the-password')).toBe(401);
-  });
+      expect(await authApi.loginStatus(email, 'not-the-password')).toBe(401);
+    },
+  );
 });

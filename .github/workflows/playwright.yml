@@ -8,6 +8,14 @@ on:
     - cron: '0 2 * * *' # nightly, 02:00 UTC, on all browsers
   workflow_dispatch:
     inputs:
+      capture_all:
+        description: Record a screenshot, video and trace for every test
+        type: boolean
+        default: false
+      regulated_pack:
+        description: Also build the regulated evidence pack (traceability, single report, checksums)
+        type: boolean
+        default: false
       all_browsers:
         description: Run on Chromium, Firefox, WebKit and a phone-sized Chrome
         type: boolean
@@ -91,7 +99,7 @@ jobs:
           restore-keys: allure-history-${{ matrix.browser }}-
 
       - name: Run tests
-        run: npx playwright test
+        run: npx playwright test ${{ inputs.capture_all && '--config=playwright.capture.config.ts' || '' }}
 
       # Advisory: a mismatch is reported but never fails the build. The baselines were rendered in the Playwright
       # image, whose fonts differ from the plain runner's, so the comparison runs in that same image. Keep the tag
@@ -106,11 +114,11 @@ jobs:
           -e UI_URL -e API_URL -e APP_NAME
           -e CUSTOMER_EMAIL -e CUSTOMER_PASSWORD -e ADMIN_EMAIL -e ADMIN_PASSWORD
           mcr.microsoft.com/playwright:v1.64.1-noble
-          npx playwright test tests/ui/visual --reporter=list --output=test-results/visual
+          npx playwright test tests/ui/visual --reporter=list --output=reports/_raw/visual
 
       - name: Build Allure report
         if: ${{ !cancelled() }}
-        run: npx allure generate allure-results --clean
+        run: npx allure generate reports/_raw/allure-results --clean --config config/allurerc.mjs
 
       - name: Save Allure history
         if: ${{ !cancelled() }}
@@ -118,6 +126,21 @@ jobs:
         with:
           path: .allure
           key: allure-history-${{ matrix.browser }}-${{ github.run_id }}
+
+      # Regulated evidence pack: only when asked for (Run workflow, "regulated pack"). Everyday runs produce the
+      # standard reports only. For a full validation run tick "capture_all" as well. Keep the pack longer than the
+      # other artifacts by setting the repository variable EVIDENCE_RETENTION_DAYS (see docs/reporting.md).
+      - name: Build evidence pack
+        if: ${{ !cancelled() && inputs.regulated_pack }}
+        run: npm run evidence
+
+      - name: Upload evidence pack
+        if: ${{ !cancelled() && inputs.regulated_pack }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-${{ matrix.browser }}
+          path: reports/regulated
+          retention-days: ${{ vars.EVIDENCE_RETENTION_DAYS || 90 }}
 
       - name: Application logs (on failure)
         if: failure()
@@ -128,7 +151,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-${{ matrix.browser }}
-          path: playwright-report
+          path: reports/standard/playwright
           retention-days: 14
 
       - name: Upload Allure report
@@ -136,7 +159,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: allure-report-${{ matrix.browser }}
-          path: allure-report
+          path: reports/standard/allure
           retention-days: 14
 
       - name: Upload traces, videos and JUnit
@@ -144,7 +167,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.browser }}
-          path: test-results
+          path: |
+            reports/_raw/test-results
+            reports/_raw/junit.xml
           retention-days: 14
 
   publish-report:

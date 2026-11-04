@@ -1,8 +1,9 @@
 import { sampleAddress } from '@data/checkout-data';
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Invoices API', () => {
+test.describe('Invoices API', { tag: [...requirement('REQ-ORD-004')] }, () => {
   test(
     'an order cannot be placed for an empty cart',
     { tag: [Tags.regression, Tags.api, Tags.knownIssue] },

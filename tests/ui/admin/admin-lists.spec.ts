@@ -1,9 +1,10 @@
 import { credentialsFor } from '@config/env';
 import { sampleAddress } from '@data/checkout-data';
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Admin lists', () => {
+test.describe('Admin lists', { tag: [...requirement('REQ-ADM-001')] }, () => {
   test(
     'an admin can find a user by email',
     { tag: [Tags.regression, Tags.ui] },

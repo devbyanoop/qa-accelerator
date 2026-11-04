@@ -1,10 +1,11 @@
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
 /** Endpoints that only an admin may call. */
 const adminOnlyEndpoints = ['/users', '/reports/total-sales-per-country'];
 
-test.describe('Access control', () => {
+test.describe('Access control', { tag: [...requirement('REQ-SEC-001')] }, () => {
   for (const path of adminOnlyEndpoints) {
     const tag = path === '/users' ? Tags.smoke : Tags.regression;
 

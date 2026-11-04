@@ -1,7 +1,8 @@
 import { expect, test } from '@fixtures/app.fixture';
+import { requirement } from '@utils/requirements';
 import { Tags } from '@utils/tags';
 
-test.describe('Admin area access', () => {
+test.describe('Admin area access', { tag: [...requirement('REQ-SEC-001')] }, () => {
   test(
     'an admin sees the dashboard with recent invoices',
     { tag: [Tags.smoke, Tags.ui] },
