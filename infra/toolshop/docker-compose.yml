@@ -6,7 +6,7 @@
 #   docker pull <image>:latest && docker image inspect <image>:latest --format '{{index .RepoDigests 0}}'
 # then paste the digest here and run the suite.
 #
-# Ports: UI http://localhost:4200, API http://localhost:8091. The UI calls the API at localhost:8091,
+# Ports: UI http://localhost:4200, API http://localhost:8091, database 127.0.0.1:3307 (for tests/db only). The UI calls the API at localhost:8091,
 # so both must be reachable on localhost from the browser that runs the tests.
 #
 # Platforms are explicit because the images are single-architecture: api and ui are amd64, web is arm64.
@@ -22,6 +22,10 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: root
       MYSQL_DATABASE: toolshop
+    # Published on the loopback interface only, so the database checks in tests/db can read it. 3307 avoids a
+    # clash with a MySQL or MariaDB that may already run on the machine.
+    ports:
+      - '127.0.0.1:3307:3306'
 
   laravel-api:
     # tag: latest

@@ -33,6 +33,8 @@ A few choices worth explaining:
   delete them afterwards, even when the test fails. Nothing relies on data another test might change.
 - **The application starts in CI from the repo itself.** Docker Compose, with the images pinned by digest, so
   a run never depends on anyone's machine and the application can't change under the tests.
+- **Some things are checked in the database.** The API says a user was created, but only the database shows
+  whether the password was stored hashed, or whether an order has its items and payment rows.
 - **Real defects are recorded, not hidden.** When a test finds a bug in the application, it's written with the
   correct expectation and marked as an expected failure. The build stays green while the bug exists and the
   test fails loudly the day it's fixed.
@@ -70,7 +72,7 @@ Six real defects, each documented as a test:
 
 ## What it looks like now
 
-- 83 tests by default, covering authentication, catalog, cart and checkout, access control, payment rules,
+- 86 tests by default, covering authentication, catalog, cart and checkout, access control, payment rules,
   the admin area, API response shapes, accessibility and a few visual checks. Three more run on a phone-sized
   screen.
 - The same suite passes on Chromium, Firefox and WebKit in GitHub Actions.

@@ -22,8 +22,8 @@ objects and API clients (see "Using it on your own application" below).
 You can browse the report from the latest run on `main` without installing anything:
 [devbyanoop.github.io/qa-accelerator](https://devbyanoop.github.io/qa-accelerator/).
 
-There are 83 tests by default and 86 if you switch on the visual checks, plus 3 phone-sized ones you can run
-separately. Each one is tagged, so you can run
+There are 86 tests by default and 89 if you switch on the visual checks, plus 3 phone-sized ones you can run
+separately. Three of the 86 read the application's database and are skipped unless you point them at it. Each one is tagged, so you can run
 only the slice you care about.
 
 - **Authentication:** login, wrong password, and protected pages bouncing anonymous visitors.
@@ -33,6 +33,8 @@ only the slice you care about.
   the page says.
 - **API contract:** the shape of the product, product list and login responses, so a renamed field or a
   changed type is caught with a clear message.
+- **Database:** what the application actually stored: an order with its items and payment, a user with a
+  hashed password, and a deleted product's row gone.
 - **Access control:** admin-only endpoints must answer 401 to anonymous users, 403 to customers and 200 to
   admins.
 - **Payment rules:** each validation rule of the payment check, valid and invalid input.
@@ -74,6 +76,13 @@ A few things worth knowing:
   `docker run --privileged --rm tonistiigi/binfmt --install arm64`. Docker Desktop already has it.
 - **No source code needed.** The app runs from images pinned by digest in `infra/toolshop/docker-compose.yml`,
   so results stay repeatable.
+
+### Database checks
+
+The tests in `tests/db` read the application's MariaDB directly, for things the screen and the API can't prove,
+such as whether a password is stored hashed. They are read-only. To run them locally, uncomment the `DB_` lines
+in `.env.local` (they match the containers that `npm run app:start` creates, and the database port is published
+on `127.0.0.1:3307` only). Without `DB_HOST` they are skipped. CI sets it, so they always run there.
 
 ## Choosing what to run
 

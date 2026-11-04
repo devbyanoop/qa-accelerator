@@ -11,6 +11,7 @@ src/fixtures/          Dependency injection: wires page objects, API clients and
   +-- src/pages/       Page objects (application-specific)
   +-- src/api/         API clients (base class is generic; domain clients are application-specific)
   +-- src/data/        Test data builders and sample values (application-specific)
+  +-- src/db/          Read-only database queries for integrity checks (application-specific)
   |
 src/config/            Environment profiles and credential resolution (generic)
 src/utils/             Tags and shared helpers (generic)
@@ -41,6 +42,7 @@ src/utils/             Tags and shared helpers (generic)
 | Environment-based configuration | `src/config/env.ts`                    | Profiles via `TEST_ENV`; nothing environment-specific in code.             |
 | Cross-cutting automatic fixture | `reportMetadata` in `base.fixture.ts`  | Report labels are applied to every test without touching specs.            |
 | Test Data Builder               | `src/data/builders.ts`                 | Every call returns unique, valid data, so parallel tests never collide.    |
+| Repository (read-only)          | `src/db/toolshop-db.ts`                | SQL lives in one class, so specs say what they check, not how to query it. |
 | Self-cleaning fixture           | `newBrand`, `newProduct`, `newUser`    | Created records are removed after the test, even when it fails.            |
 | Known-issue (expected failure)  | `Tags.knownIssue` with `test.fail`     | Application defects are documented without leaving the build red.          |
 

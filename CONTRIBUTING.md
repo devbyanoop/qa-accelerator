@@ -68,6 +68,12 @@ is fixed, which is the signal to remove the tag.
 - **Mobile:** specs in `tests/ui/mobile` run only in the `mobile-chrome` project (a phone-sized Chrome), with
   `BROWSERS=mobile-chrome`. The other specs are written for a desktop layout and are not run there.
 
+## Database checks
+
+`tests/db` reads the application's database through `src/db/toolshop-db.ts`. Keep it read-only: create data
+through the API, then look at what was stored. Put new queries in `ToolshopDb` rather than in specs, and skip
+the spec when `env.db` is not set, as the existing ones do.
+
 ## Accessibility and visual checks
 
 - **Accessibility:** `tests/ui/accessibility` fails only on violations that are not in its `knownViolations`

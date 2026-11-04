@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { credentialsFor } from '@config/env';
+import { credentialsFor, env } from '@config/env';
 import { AccessApi } from '@api/access-api';
 import { AuthApi } from '@api/auth-api';
 import { BrandsApi } from '@api/brands-api';
@@ -17,6 +17,7 @@ import { UsersApi } from '@api/users-api';
 import type { UserRecord } from '@api/users-api';
 import { buildBrand, buildProduct, buildUser } from '@data/builders';
 import type { BrandDraft, ProductDraft, UserDraft } from '@data/builders';
+import { ToolshopDb } from '@db/toolshop-db';
 import { AccountPage } from '@pages/account-page';
 import { AdminBrandsPage, BrandFormPage } from '@pages/admin/admin-brands-page';
 import { AdminDashboardPage } from '@pages/admin/admin-dashboard-page';
@@ -49,6 +50,9 @@ interface AppFixtures {
   paymentApi: PaymentApi;
   accessApi: AccessApi;
   postcodeApi: PostcodeApi;
+
+  /** Read-only connection to the application's database. Needs the DB_ variables; see tests/db. */
+  toolshopDb: ToolshopDb;
 
   // Page objects
   header: Header;
@@ -120,6 +124,16 @@ export const test = base.extend<AppFixtures>({
   paymentApi: async ({ api }, use) => use(new PaymentApi(api)),
   accessApi: async ({ api }, use) => use(new AccessApi(api)),
   postcodeApi: async ({ api }, use) => use(new PostcodeApi(api)),
+
+  // eslint-disable-next-line no-empty-pattern
+  toolshopDb: async ({}, use) => {
+    if (!env.db) {
+      throw new Error('The database checks need DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_NAME.');
+    }
+    const db = await ToolshopDb.connect(env.db);
+    await use(db);
+    await db.close();
+  },
 
   header: async ({ page }, use) => use(new Header(page)),
   loginPage: async ({ page }, use) => use(new LoginPage(page)),

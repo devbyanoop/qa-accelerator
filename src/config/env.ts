@@ -42,6 +42,19 @@ export const env = {
    * when asked: VISUAL=true. Other operating systems render fonts differently and would never match.
    */
   visual: process.env.VISUAL === 'true',
+  /**
+   * Direct, read-only access to the application's database, for the checks in tests/db. Set DB_HOST (and the
+   * other DB_ values) to enable them; without DB_HOST those tests are skipped.
+   */
+  db: process.env.DB_HOST
+    ? {
+        host: process.env.DB_HOST,
+        port: Number(required('DB_PORT')),
+        user: required('DB_USER'),
+        password: required('DB_PASSWORD'),
+        database: required('DB_NAME'),
+      }
+    : undefined,
 } as const;
 
 /** Credentials are resolved lazily so a run that never logs in does not need them. */
