@@ -77,7 +77,7 @@ jobs:
         run: npm run app:start
 
       - name: Restore Allure history
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: .allure
           key: allure-history-${{ matrix.browser }}-${{ github.run_id }}
@@ -100,7 +100,7 @@ jobs:
 
       - name: Save Allure history
         if: ${{ !cancelled() }}
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: .allure
           key: allure-history-${{ matrix.browser }}-${{ github.run_id }}
