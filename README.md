@@ -391,7 +391,7 @@ git diff v1.0.0 v1.1.0 -- tools config .github
 [CHANGELOG.md](CHANGELOG.md) says what changed in each release, and which changes can break an existing setup.
 
 [ARCHITECTURE.pdf](docs/ARCHITECTURE.pdf) explains how the pieces fit together and [CONTRIBUTING.md](.github/CONTRIBUTING.md)
-covers conventions for new tests. For the story behind the project, see the [case study](docs/case-study.pdf).
+covers conventions for new tests.
 
 ## Releases and security
 

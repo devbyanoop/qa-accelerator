@@ -17,3 +17,6 @@ reports/*
 # The guides in docs/ are published as PDF only (npm run docs:pdf). Their Markdown and HTML sources are not committed.
 docs/**/*.md
 docs/**/*.html
+
+# The case study is a personal document, kept on disk only (Markdown and PDF).
+docs/case-study.pdf

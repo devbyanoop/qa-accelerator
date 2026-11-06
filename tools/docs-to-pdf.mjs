@@ -67,8 +67,21 @@ table { border-collapse: collapse; width: 100%; margin: 0 0 1em; font-size: .9em
 th, td { border: 1px solid #d1d9e0; padding: 5px 9px; text-align: left; vertical-align: top; }
 th { background: #f6f8fa; }
 tr { break-inside: avoid; }
+p:has(+ table), p:has(+ .callout) { break-after: avoid; }
+table:not(:has(tr:nth-child(12))) { break-inside: avoid; }
 img { max-width: 100%; border: 1px solid #d1d9e0; border-radius: 4px; }
 ul:has(input[type=checkbox]) { list-style: none; padding-left: .4em; }
+.eyebrow { margin: 0 0 .2em; color: #0969da; font-size: .8em; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.byline { margin: -.4em 0 1.4em; color: #59636e; font-size: .92em; }
+.lead { font-size: 1.1em; color: #36404a; }
+.stats { display: flex; gap: 10px; margin: 1.2em 0 1.6em; break-inside: avoid; }
+.stat { flex: 1; padding: 12px 10px; text-align: center; background: #f6f8fa; border: 1px solid #d1d9e0; border-top: 3px solid #0969da; border-radius: 6px; }
+.stat b { display: block; font-size: 1.9em; line-height: 1.1; color: #0969da; }
+.stat span { font-size: .72em; letter-spacing: .05em; text-transform: uppercase; color: #59636e; }
+.callout ul { margin: 0; }
+.callout li { margin: .3em 0; }
+.callout { margin: 0 0 1.2em; padding: 6px 16px; background: #f6f8fa; border-left: 4px solid #0969da; border-radius: 0 6px 6px 0; break-inside: avoid; }
+.callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
 `;
 
 const browser = await chromium.launch();
