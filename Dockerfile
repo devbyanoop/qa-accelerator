@@ -9,7 +9,7 @@
 #
 # --network host (Linux) lets the browser reach the application on the host's localhost, which the
 # application's UI requires. Pass any Playwright arguments after the image name, e.g. --grep @smoke.
-FROM mcr.microsoft.com/playwright:v1.64.1-noble
+FROM mcr.microsoft.com/playwright:v1.65.0-noble
 
 WORKDIR /app
 
